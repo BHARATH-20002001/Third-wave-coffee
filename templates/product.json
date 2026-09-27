@@ -211,11 +211,18 @@
         "padding-block-start": 48,
         "padding-block-end": 48
       }
+    },
+    "twc_accurity_section": {
+      "type": "twc-accurity-section",
+      "settings": {
+        "heading": "100% ARABICA COFFEE, SOURCED RESPONSIBLY, ROASTED CAREFULLY."
+      }
     }
   },
   "order": [
     "main",
     "twc_methods_of_use",
+    "twc_accurity_section",
     "product_recommendations_qggXJq"
   ]
 }
