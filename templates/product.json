@@ -56,10 +56,107 @@
         "padding-block-start": 48,
         "padding-block-end": 48
       }
+    },
+    "twc_methods_of_use": {
+      "type": "twc-methods-of-use",
+      "blocks": {
+        "prop_1": {
+          "type": "value_prop",
+          "settings": {
+            "preset_icon": "sourced",
+            "title": "ETHICALLY SOURCED",
+            "caption": "Roasted 4 hours after your order is placed"
+          }
+        },
+        "prop_2": {
+          "type": "value_prop",
+          "settings": {
+            "preset_icon": "roasted",
+            "title": "ROASTED TO ORDER",
+            "caption": "Roasted 4 hours after your order is placed"
+          }
+        },
+        "prop_3": {
+          "type": "value_prop",
+          "settings": {
+            "preset_icon": "sealed",
+            "title": "SEALED FOR FRESHNESS",
+            "caption": "Sealed promptly after roast"
+          }
+        },
+        "prop_4": {
+          "type": "value_prop",
+          "settings": {
+            "preset_icon": "delivered",
+            "title": "DELIVERED FRESH",
+            "caption": "Roasts and ships the same day"
+          }
+        },
+        "method_1": {
+          "type": "brewing_method",
+          "settings": {
+            "title": "METHOD 1 NAME",
+            "time": "5 min",
+            "description": "<p>Lorem ipsum dolor sit amet, consectetur erat adipiscing elit. Donec erat urna, tincidunt neque gravida neque sed, fringilla commodo dui. Cras orci arcu, sodales id neque sit amet.</p>",
+            "link_label": "Learn more",
+            "link_url": "#",
+            "fallback_image_url": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=1200&q=80"
+          }
+        },
+        "method_2": {
+          "type": "brewing_method",
+          "settings": {
+            "title": "METHOD 2 NAME",
+            "time": "4 min",
+            "description": "<p>French Press yields a rich, full-bodied cup by steeping coarsely ground beans directly in hot water before pressing down the fine stainless mesh filter.</p>",
+            "link_label": "Learn more",
+            "link_url": "#",
+            "fallback_image_url": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=1200&q=80"
+          }
+        },
+        "method_3": {
+          "type": "brewing_method",
+          "settings": {
+            "title": "METHOD 3 NAME",
+            "time": "2.5 min",
+            "description": "<p>AeroPress leverages gentle air pressure to extract maximum flavor clarity with zero bitterness, perfect for both espresso-strength and delicate profiles.</p>",
+            "link_label": "Learn more",
+            "link_url": "#",
+            "fallback_image_url": "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=1200&q=80"
+          }
+        },
+        "method_4": {
+          "type": "brewing_method",
+          "settings": {
+            "title": "METHOD 4 NAME",
+            "time": "6 min",
+            "description": "<p>Chemex uses bonded, ultra-dense filters to remove virtually all coffee oils and sediments, delivering an exceptionally pure, nuanced floral brew.</p>",
+            "link_label": "Learn more",
+            "link_url": "#",
+            "fallback_image_url": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=80"
+          }
+        }
+      },
+      "block_order": [
+        "prop_1",
+        "prop_2",
+        "prop_3",
+        "prop_4",
+        "method_1",
+        "method_2",
+        "method_3",
+        "method_4"
+      ],
+      "settings": {
+        "heading": "BREWING METHODS",
+        "button_label": "DOWNLOAD OUR BREW GUIDES",
+        "button_url": "#"
+      }
     }
   },
   "order": [
     "main",
+    "twc_methods_of_use",
     "product_recommendations_qggXJq"
   ]
 }

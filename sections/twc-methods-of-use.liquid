@@ -1,0 +1,1093 @@
+<section class="twc-methods-section twc-methods-{{ section.id }}" id="twc-methods-{{ section.id }}">
+  <div class="twc-methods-container">
+
+    {%- if section.settings.show_value_props -%}
+      <!-- 4-COLUMN VALUE PROPOSITIONS GRID -->
+      <div class="twc-value-props-grid" aria-label="Our Commitments">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'value_prop' -%}
+            <article class="twc-prop-card" {{ block.shopify_attributes }}>
+              <div class="twc-prop-icon-wrapper">
+                {%- if block.settings.custom_svg != blank -%}
+                  {{ block.settings.custom_svg }}
+                {%- elsif block.settings.icon_image != blank -%}
+                  <img
+                    src="{{ block.settings.icon_image | image_url: width: 100 }}"
+                    alt="{{ block.settings.title | escape }}"
+                    class="twc-prop-icon-img"
+                    width="48"
+                    height="48"
+                    loading="lazy"
+                  >
+                {%- else -%}
+                  {%- case block.settings.preset_icon -%}
+                    {%- when 'sourced' -%}
+                      <svg class="twc-prop-icon" viewBox="0 0 64 64">
+                        <path d="M12 40c4-2 10-2 15 2l8 6c4 3 9 4 15 2l6-2" />
+                        <path d="M12 40c-2 2-2 5 0 7 4 4 10 5 16 3l12-5" />
+                        <ellipse cx="36" cy="21" rx="8" ry="12" transform="rotate(25 36 21)" fill="currentColor" stroke="currentColor" />
+                        <path d="M33 11c3 6 4 14 0 20" stroke="#ffffff" stroke-width="1.6" />
+                      </svg>
+                    {%- when 'roasted' -%}
+                      <svg class="twc-prop-icon" viewBox="0 0 64 64">
+                        <ellipse cx="26" cy="36" rx="9" ry="13" transform="rotate(-15 26 36)" fill="currentColor" stroke="currentColor" />
+                        <path d="M25 25c2 6 2 15-2 21" stroke="#ffffff" stroke-width="1.6" />
+                        <path d="M35 15c2 2 2 5 0 7" />
+                        <path d="M40 12c3 3 3 8 0 11" />
+                        <circle cx="20" cy="22" r="9" fill="#ffffff" stroke="currentColor" stroke-width="1.8" />
+                        <polyline points="20 17 20 22 24 24" stroke="currentColor" stroke-width="1.8" />
+                      </svg>
+                    {%- when 'sealed' -%}
+                      <svg class="twc-prop-icon" viewBox="0 0 64 64">
+                        <rect x="15" y="24" width="34" height="26" rx="2" stroke="currentColor" stroke-width="1.8" />
+                        <line x1="15" y1="31" x2="49" y2="31" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M32 24c-4-8-12-8-11-1 1 5 11 1 11 1" />
+                        <path d="M32 24c4-8 12-8 11-1-1 5-11 1-11 1" />
+                        <ellipse cx="32" cy="40" rx="4.5" ry="6.5" fill="currentColor" stroke="currentColor" />
+                        <path d="M32 35c1 3 1 7-1 10" stroke="#ffffff" stroke-width="1.2" />
+                      </svg>
+                    {%- when 'delivered' -%}
+                      <svg class="twc-prop-icon" viewBox="0 0 64 64">
+                        <path d="M12 24h24v18h-24z" stroke="currentColor" stroke-width="1.8" />
+                        <path d="M36 27h10l5 7v8h-15z" stroke="currentColor" stroke-width="1.8" />
+                        <circle cx="21" cy="43" r="4.5" fill="#ffffff" stroke="currentColor" stroke-width="1.8" />
+                        <circle cx="44" cy="43" r="4.5" fill="#ffffff" stroke="currentColor" stroke-width="1.8" />
+                        <ellipse cx="24" cy="33" rx="3.5" ry="5" fill="currentColor" stroke="currentColor" />
+                        <path d="M24 29c1 2 1 6-1 8" stroke="#ffffff" stroke-width="1" />
+                        <path d="M27 16c2 2 1 5 0 7" />
+                        <path d="M32 14c2 3 1 6-1 8" />
+                      </svg>
+                  {%- endcase -%}
+                {%- endif -%}
+              </div>
+              {%- if block.settings.title != blank -%}
+                <h3 class="twc-prop-title">{{ block.settings.title }}</h3>
+              {%- endif -%}
+              <div class="twc-prop-divider"></div>
+              {%- if block.settings.caption != blank -%}
+                <p class="twc-prop-caption">{{ block.settings.caption }}</p>
+              {%- endif -%}
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    <!-- BREWING METHODS (FLEX: 25% CONTENT / 65% DESKTOP IMAGE) -->
+    <div class="twc-brewing-section" aria-label="Brewing Guides and Methods">
+      
+      <!-- Left Column: Accordion (25% width on desktop) -->
+      <div class="twc-brewing-content">
+        {%- if section.settings.heading != blank -%}
+          <h2 class="twc-section-headline">{{ section.settings.heading }}</h2>
+        {%- endif -%}
+
+        <div class="twc-accordion-list" role="region" aria-label="Brewing Method Details">
+          {%- assign method_index = 0 -%}
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'brewing_method' -%}
+              {%- assign method_index = method_index | plus: 1 -%}
+              <div class="twc-accordion-item {% if method_index == 1 %}active{% endif %}" data-target="twc-method-img-{{ block.id }}" {{ block.shopify_attributes }}>
+                <button class="twc-accordion-header" aria-expanded="{% if method_index == 1 %}true{% else %}false{% endif %}" type="button">
+                  <span class="twc-method-name">{{ block.settings.title }}</span>
+                  <svg class="twc-chevron-icon" viewBox="0 0 24 24">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+                <div class="twc-accordion-body">
+                  <div class="twc-accordion-inner">
+                    <div class="twc-method-details">
+                      {%- if block.settings.time != blank -%}
+                        <p class="twc-method-time"><strong>Total time:</strong> {{ block.settings.time }}</p>
+                      {%- endif -%}
+                      {%- if block.settings.description != blank -%}
+                        <div class="twc-method-desc">
+                          {{ block.settings.description }}
+                        </div>
+                      {%- endif -%}
+                      {%- if block.settings.link_label != blank and block.settings.link_url != blank -%}
+                        <div class="twc-learn-more-wrapper">
+                          <a href="{{ block.settings.link_url }}" class="twc-learn-more-link">{{ block.settings.link_label }}</a>
+                        </div>
+                      {%- endif -%}
+
+                      <!-- Mobile Accordion Inline Image -->
+                      <div class="twc-mobile-method-image">
+                        {%- if block.settings.image != blank -%}
+                          <img
+                            src="{{ block.settings.image | image_url: width: 800 }}"
+                            alt="{{ block.settings.image.alt | default: block.settings.title | escape }}"
+                            loading="lazy"
+                            width="{{ block.settings.image.width }}"
+                            height="{{ block.settings.image.height }}"
+                          >
+                        {%- elsif block.settings.fallback_image_url != blank -%}
+                          <img
+                            src="{{ block.settings.fallback_image_url }}"
+                            alt="{{ block.settings.title | escape }}"
+                            loading="lazy"
+                          >
+                        {%- endif -%}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+
+        <!-- Action Button (Add to cart styling) -->
+        {%- if section.settings.button_label != blank -%}
+          <a href="{{ section.settings.button_url | default: '#' }}" class="twc-download-btn">
+            <span class="twc-download-btn__text">{{ section.settings.button_label }}</span>
+            <svg class="twc-download-btn__arrow" xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21.0 21.0">
+              <g>
+                <g transform="translate(-116.975,-153)">
+                  <path fill="currentColor" d="m 132.975,170 c -0.274,0 -0.497,-0.221 -0.5,-0.495 -0.017,-1.674 0.626,-4.733 2.981,-6.005 -2.355,-1.271 -2.998,-4.331 -2.981,-6.005 0.003,-0.274 0.226,-0.495 0.5,-0.495 0.001,0 0.003,0 0.004,0 0.276,0.003 0.498,0.229 0.496,0.505 -0.001,0.198 0.004,4.867 3.587,5.503 0.239,0.042 0.413,0.25 0.413,0.492 0,0.242 -0.174,0.45 -0.413,0.492 -3.595,0.638 -3.588,5.453 -3.587,5.503 0.003,0.276 -0.219,0.502 -0.495,0.505 -10e-4,0 -0.003,0 -0.005,0 z"></path>
+                </g>
+                <g transform="translate(-121,-152)">
+                  <path fill="currentColor" d="m 141,163 h -19 c -0.276,0 -0.5,-0.225 -0.5,-0.5 0,-0.275 0.224,-0.5 0.5,-0.5 h 19 c 0.276,0 0.5,0.225 0.5,0.5 0,0.275 -0.224,0.5 -0.5,0.5 z"></path>
+                </g>
+              </g>
+            </svg>
+          </a>
+        {%- endif -%}
+      </div>
+
+      <!-- Right Column: Visual Stage (Desktop Image: ~65% width) -->
+      <div class="twc-brewing-visual-wrapper">
+        {%- assign img_index = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'brewing_method' -%}
+            {%- assign img_index = img_index | plus: 1 -%}
+            {%- if block.settings.image != blank -%}
+              <img
+                id="twc-method-img-{{ block.id }}"
+                class="twc-brewing-image {% if img_index == 1 %}active{% endif %}"
+                src="{{ block.settings.image | image_url: width: 1200 }}"
+                alt="{{ block.settings.image.alt | default: block.settings.title | escape }}"
+                loading="{% if img_index == 1 %}eager{% else %}lazy{% endif %}"
+                width="{{ block.settings.image.width }}"
+                height="{{ block.settings.image.height }}"
+              >
+            {%- elsif block.settings.fallback_image_url != blank -%}
+              <img
+                id="twc-method-img-{{ block.id }}"
+                class="twc-brewing-image {% if img_index == 1 %}active{% endif %}"
+                src="{{ block.settings.fallback_image_url }}"
+                alt="{{ block.settings.title | escape }}"
+                loading="{% if img_index == 1 %}eager{% else %}lazy{% endif %}"
+              >
+            {%- else -%}
+              <div id="twc-method-img-{{ block.id }}" class="twc-brewing-image twc-brewing-image-placeholder {% if img_index == 1 %}active{% endif %}">
+                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+              </div>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400;1,700&family=Montserrat:wght@400;500;600;700&display=swap');
+
+  /* ==========================================================================
+     THIRD WAVE COFFEE - METHODS OF USE SECTION STYLES
+     ========================================================================== */
+  .twc-methods-{{ section.id }} {
+    background-color: {{ section.settings.bg_color | default: '#FBFAF9' }};
+    color: {{ section.settings.text_color | default: '#1a2634' }};
+    font-family: 'Lato', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    box-sizing: border-box;
+    width: 100%;
+    position: relative;
+  }
+
+  .twc-methods-{{ section.id }} *,
+  .twc-methods-{{ section.id }} *::before,
+  .twc-methods-{{ section.id }} *::after {
+    box-sizing: border-box;
+  }
+
+  /* 1. Main container: Matches .twc-product-container width and padding */
+  .twc-methods-{{ section.id }} .twc-methods-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 100px 40px 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: {{ section.settings.section_gap | default: 64 }}px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* TOP: 4-COLUMN VALUE PROPOSITIONS GRID */
+  .twc-methods-{{ section.id }} .twc-value-props-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 32px;
+    width: 100%;
+  }
+
+  .twc-methods-{{ section.id }} .twc-prop-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .twc-methods-{{ section.id }} .twc-prop-icon-wrapper {
+    height: 56px;
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 16px;
+    color: {{ section.settings.accent_color | default: '#2D3C4B' }};
+  }
+
+  .twc-methods-{{ section.id }} .twc-prop-icon {
+    width: 48px;
+    height: 48px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .twc-methods-{{ section.id }} .twc-prop-icon-wrapper svg {
+    display: block;
+    max-width: 48px;
+    max-height: 48px;
+  }
+
+  .twc-methods-{{ section.id }} .twc-prop-icon-img {
+    width: 75px;
+    height: 75px;
+    object-fit: contain;
+  }
+
+  .twc-methods-{{ section.id }} .twc-prop-title {
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: {{ section.settings.accent_color | default: '#2D3C4B' }};
+    margin: 0 0 10px 0;
+  }
+
+  .twc-methods-{{ section.id }} .twc-prop-divider {
+    width: 100%;
+    height: 1.5px;
+    background-color: {{ section.settings.divider_color | default: '#2D3C4B' }};
+    margin-bottom: 12px;
+  }
+
+  /* 2. Caption font style: "Angsana New", serif */
+  .twc-methods-{{ section.id }} .twc-prop-caption {
+    font-family: "Angsana New", serif;
+    font-size: 17px;
+    color: #606B76;
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  /* 3. Brewing Methods: Left container width 25%, Space Between */
+  .twc-methods-{{ section.id }} .twc-brewing-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .twc-methods-{{ section.id }} .twc-brewing-content {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 24%;
+    width: 24%;
+    max-width: 24%;
+  }
+
+  /* Section Title Styled Like Product Details Page Title */
+  .twc-methods-{{ section.id }} .twc-section-headline {
+    font-family: 'Lato', sans-serif;
+    font-size: 25px;
+    line-height: 1.25;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: {{ section.settings.accent_color | default: '#2D3C4B' }};
+    letter-spacing: 0.02em;
+    margin: 0 0 24px 0;
+  }
+
+  .twc-methods-{{ section.id }} .twc-accordion-list {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 28px;
+    row-gap: 30px;
+  }
+
+  .twc-methods-{{ section.id }} .twc-accordion-item {
+    border-bottom: 1px solid {{ section.settings.divider_color | default: '#2D3C4B' }};
+  }
+
+  /* 6. Remove space-between and add 20px gap */
+  .twc-methods-{{ section.id }} .twc-accordion-header {
+    width: 100%;
+    background: none;
+    border: none;
+    outline: none;
+    padding: 16px 0;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    cursor: pointer;
+    text-align: left;
+    transition: opacity 0.2s ease;
+  }
+
+  .twc-methods-{{ section.id }} .twc-accordion-header:hover {
+    opacity: 0.8;
+  }
+
+  .twc-methods-{{ section.id }} .twc-method-name {
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: {{ section.settings.accent_color | default: '#2D3C4B' }};
+  }
+
+  .twc-methods-{{ section.id }} .twc-chevron-icon {
+    width: 14px;
+    height: 14px;
+    stroke: {{ section.settings.accent_color | default: '#2D3C4B' }};
+    fill: none;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+  }
+
+  /* Smooth Height Transition with CSS Grid */
+  .twc-methods-{{ section.id }} .twc-accordion-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .twc-methods-{{ section.id }} .twc-accordion-inner {
+    overflow: hidden;
+  }
+
+  .twc-methods-{{ section.id }} .twc-accordion-item.active .twc-accordion-body {
+    grid-template-rows: 1fr;
+  }
+
+  .twc-methods-{{ section.id }} .twc-accordion-item.active .twc-chevron-icon {
+    transform: rotate(180deg);
+  }
+
+  .twc-methods-{{ section.id }} .twc-method-details {
+    padding: 0 0 20px 0;
+  }
+
+  .twc-methods-{{ section.id }} .twc-accordion-item.active .twc-method-details {
+    padding-top: 20px;
+  }
+
+  .twc-methods-{{ section.id }} .twc-method-time {
+    font-family: "Angsana New", serif;
+    font-size: 17px;
+    color: #2D3C4B;
+    margin: 0 0 8px 0;
+    line-height: 1.35;
+  }
+
+  .twc-methods-{{ section.id }} .twc-method-time strong {
+    font-weight: 600;
+  }
+
+  /* 5. twc-method-desc font style exactly like small_description (Angsana New, 15px, line-height 1.3, #25394A) */
+  .twc-methods-{{ section.id }} .twc-method-desc {
+    font-family: "Angsana New", serif;
+    font-size: 15px;
+    line-height: 1.3;
+    color: #25394A;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .twc-methods-{{ section.id }} .twc-method-desc p {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+    font-weight: inherit;
+    margin: 0 0 6px 0;
+    display: inline;
+  }
+
+  /* 1. Learn more on next line below caption, font-weight 600 with underline */
+  .twc-methods-{{ section.id }} .twc-learn-more-wrapper {
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+
+  .twc-methods-{{ section.id }} .twc-learn-more-link {
+    display: inline-block;
+    font-family: "Angsana New", serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: {{ section.settings.accent_color | default: '#2D3C4B' }};
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: opacity 0.2s ease;
+  }
+
+  .twc-methods-{{ section.id }} .twc-learn-more-link:hover {
+    opacity: 0.7;
+  }
+
+  /* Mobile Inline Image inside Accordion */
+  .twc-methods-{{ section.id }} .twc-mobile-method-image {
+    display: none;
+    margin-top: 14px;
+    width: 100%;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .twc-methods-{{ section.id }} .twc-mobile-method-image img {
+    width: 100%;
+    height: auto;
+    max-height: 320px;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* 4. Download CTA like Add To Cart style: height 40px, border-radius 0px 18px, Lato 10px uppercase, arrow */
+  .twc-methods-{{ section.id }} .twc-download-btn {
+    height: 40px;
+    width: 100%;
+    background-color: var(--twc-p-btn-bg, #2D3C4B);
+    color: var(--twc-p-bg, #EEE2E1);
+    border: none;
+    border-radius: 0px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: background-color 0.25s ease, transform 0.15s ease;
+    box-sizing: border-box;
+    padding: 0 16px;
+    text-decoration: none;
+    margin-top: 10px;
+  }
+
+  .twc-methods-{{ section.id }} .twc-download-btn:hover {
+    background-color: #1e2832;
+  }
+
+  .twc-methods-{{ section.id }} .twc-download-btn:active {
+    transform: scale(0.985);
+  }
+
+  .twc-methods-{{ section.id }} .twc-download-btn__text {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .twc-methods-{{ section.id }} .twc-download-btn__arrow {
+    width: 21px;
+    height: 21px;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+    color: var(--twc-p-bg, #EEE2E1);
+  }
+
+  .twc-methods-{{ section.id }} .twc-download-btn:hover .twc-download-btn__arrow {
+    transform: translateX(4px);
+  }
+
+  /* Active accordion: show line below header/title, remove line below content/learn more */
+  .twc-methods-{{ section.id }} .twc-accordion-item.active {
+    border-bottom: none;
+  }
+
+  .twc-methods-{{ section.id }} .twc-accordion-item.active .twc-accordion-header {
+    border-bottom: 1px solid {{ section.settings.divider_color | default: '#2D3C4B' }};
+  }
+
+  /* 3. Right Column: Visual Stage (Desktop Image: reduced height from 520px to 380px, width unchanged) */
+  .twc-methods-{{ section.id }} .twc-brewing-visual-wrapper {
+    position: sticky;
+    top: 40px;
+    flex: 0 0 60%;
+    width: 60%;
+    max-width: 60%;
+    height: 450px;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: #f7f7f7;
+  }
+
+  .twc-methods-{{ section.id }} .twc-brewing-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0;
+    transform: scale(1.02);
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .twc-methods-{{ section.id }} .twc-brewing-image.active {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+
+  .twc-methods-{{ section.id }} .twc-brewing-image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef2f5;
+  }
+
+  .twc-methods-{{ section.id }} .twc-brewing-image-placeholder svg {
+    width: 80px;
+    height: 80px;
+    opacity: 0.4;
+  }
+
+  /* ==========================================================================
+     481px — 768px: iPads, Tablets Responsive
+     ========================================================================== */
+  @media only screen and (min-width: 481px) and (max-width: 768px) {
+    /* 5. 50px padding top and bottom */
+    .twc-methods-{{ section.id }} .twc-methods-container {
+      padding: 50px 24px;
+      gap: 36px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-value-props-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px 20px;
+    }
+
+    /* 4. Scaled font sizes proportionally */
+    .twc-methods-{{ section.id }} .twc-prop-icon-img {
+      width: 58px;
+      height: 58px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-prop-title {
+      font-size: 13px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-prop-caption {
+      font-size: 15px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-brewing-section {
+      flex-direction: column;
+    }
+
+    .twc-methods-{{ section.id }} .twc-brewing-content {
+      flex: 1 1 100%;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    /* Reduce gap between accordions */
+    .twc-methods-{{ section.id }} .twc-accordion-list {
+      row-gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-accordion-header {
+      padding: 12px 0;
+      gap: 16px;
+    }
+
+    /* Section Headline */
+    .twc-methods-{{ section.id }} .twc-section-headline {
+      font-size: 21px;
+      margin-bottom: 20px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-method-name {
+      font-size: 13.5px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-method-time {
+      font-size: 15px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-method-desc {
+      font-size: 13.5px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-learn-more-link {
+      font-size: 13.5px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-download-btn {
+      height: 38px;
+      font-size: 9.5px;
+      max-width: 320px;
+      margin-top: 8px;
+    }
+
+    /* Hide desktop sticky right column on tablet */
+    .twc-methods-{{ section.id }} .twc-brewing-visual-wrapper {
+      display: none;
+    }
+
+    /* Show image inside active accordion item on tablet */
+    .twc-methods-{{ section.id }} .twc-mobile-method-image {
+      display: block;
+    }
+
+    .twc-methods-{{ section.id }} .twc-mobile-method-image img {
+      max-height: 280px;
+    }
+  }
+
+  /* ==========================================================================
+     320px — 480px: Mobile Devices Responsive
+     ========================================================================== */
+  @media only screen and (min-width: 320px) and (max-width: 480px) {
+    /* 5. 50px padding top and bottom */
+    .twc-methods-{{ section.id }} .twc-methods-container {
+      padding: 50px 16px;
+      gap: 40px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-value-props-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    /* 4. Scaled font sizes proportionally */
+    .twc-methods-{{ section.id }} .twc-prop-icon-img {
+      width: 50px;
+      height: 50px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-prop-title {
+      font-size: 12.5px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-prop-caption {
+      font-size: 14px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-brewing-section {
+      flex-direction: column;
+    }
+
+    .twc-methods-{{ section.id }} .twc-brewing-content {
+      flex: 1 1 100%;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    /* Reduce gap between accordions on mobile */
+    .twc-methods-{{ section.id }} .twc-accordion-list {
+      row-gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-accordion-header {
+      padding: 10px 0;
+      gap: 14px;
+    }
+
+    /* Section Headline */
+    .twc-methods-{{ section.id }} .twc-section-headline {
+      font-size: 18px;
+      margin-bottom: 18px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-method-name {
+      font-size: 12.5px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-method-time {
+      font-size: 14px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-method-desc {
+      font-size: 12.5px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-learn-more-link {
+      font-size: 12.5px;
+    }
+
+    .twc-methods-{{ section.id }} .twc-download-btn {
+      height: 38px;
+      font-size: 9px;
+      padding: 0 14px;
+      margin-top: 6px;
+    }
+
+    /* Hide desktop sticky right column on mobile */
+    .twc-methods-{{ section.id }} .twc-brewing-visual-wrapper {
+      display: none;
+    }
+
+    /* Show image inside active accordion item on mobile */
+    .twc-methods-{{ section.id }} .twc-mobile-method-image {
+      display: block;
+    }
+
+    .twc-methods-{{ section.id }} .twc-mobile-method-image img {
+      max-height: 220px;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    function initMethodsOfUse() {
+      const sectionElem = document.getElementById('twc-methods-{{ section.id }}');
+      if (!sectionElem) return;
+
+      const accordionItems = sectionElem.querySelectorAll('.twc-accordion-item');
+      const methodImages = sectionElem.querySelectorAll('.twc-brewing-image');
+
+      accordionItems.forEach(item => {
+        const header = item.querySelector('.twc-accordion-header');
+        if (!header) return;
+
+        header.addEventListener('click', () => {
+          const isCurrentlyActive = item.classList.contains('active');
+          if (isCurrentlyActive) return;
+
+          // 1. Reset all accordion items in this section
+          accordionItems.forEach(otherItem => {
+            otherItem.classList.remove('active');
+            const otherHeader = otherItem.querySelector('.twc-accordion-header');
+            if (otherHeader) otherHeader.setAttribute('aria-expanded', 'false');
+          });
+
+          // 2. Activate clicked item
+          item.classList.add('active');
+          header.setAttribute('aria-expanded', 'true');
+
+          // 3. Switch image with crossfade (desktop right column)
+          const targetImageId = item.getAttribute('data-target');
+          methodImages.forEach(img => {
+            if (img.id === targetImageId) {
+              img.classList.add('active');
+            } else {
+              img.classList.remove('active');
+            }
+          });
+        });
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMethodsOfUse);
+    } else {
+      initMethodsOfUse();
+    }
+
+    // Support Shopify Theme Editor dynamic events
+    document.addEventListener('shopify:section:load', function(event) {
+      if (event.detail && event.detail.sectionId === '{{ section.id }}') {
+        initMethodsOfUse();
+      }
+    });
+
+    document.addEventListener('shopify:block:select', function(event) {
+      if (event.detail && event.detail.sectionId === '{{ section.id }}') {
+        const blockId = event.detail.blockId;
+        const targetItem = document.querySelector(`.twc-accordion-item[data-target="twc-method-img-${blockId}"]`);
+        if (targetItem) {
+          const header = targetItem.querySelector('.twc-accordion-header');
+          if (header) header.click();
+        }
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "TWC Methods of Use",
+  "tag": "section",
+  "class": "section-twc-methods-of-use",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Value Propositions"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_value_props",
+      "label": "Show value propositions",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Brewing Methods Section"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Brewing Methods"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button Label",
+      "default": "Download Our Brew Guides"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Styling & Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#1a2634"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Headings & Accent Color",
+      "default": "#2D3C4B"
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Divider Line Color",
+      "default": "#2b3949"
+    },
+    {
+      "type": "range",
+      "id": "section_gap",
+      "min": 24,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Gap Between Blocks",
+      "default": 64
+    }
+  ],
+  "blocks": [
+    {
+      "type": "value_prop",
+      "name": "Value Proposition",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "select",
+          "id": "preset_icon",
+          "label": "Preset Icon",
+          "options": [
+            { "value": "sourced", "label": "Ethically Sourced (Leaves)" },
+            { "value": "roasted", "label": "Roasted To Order (Clock & Beans)" },
+            { "value": "sealed", "label": "Sealed For Freshness (Coffee Bag)" },
+            { "value": "delivered", "label": "Delivered Fresh (Delivery Truck)" }
+          ],
+          "default": "sourced"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Custom Icon Image (Optional)"
+        },
+        {
+          "type": "html",
+          "id": "custom_svg",
+          "label": "Custom SVG Code (Optional)"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Ethically Sourced"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption",
+          "default": "Roasted 4 hours after your order is placed"
+        }
+      ]
+    },
+    {
+      "type": "brewing_method",
+      "name": "Brewing Method",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Method Name",
+          "default": "Method 1 Name"
+        },
+        {
+          "type": "text",
+          "id": "time",
+          "label": "Total Time",
+          "default": "5 min"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description",
+          "default": "<p>Lorem ipsum dolor sit amet, consectetur erat adipiscing elit. Donec erat urna, tincidunt neque gravida neque sed, fringilla commodo dui.</p>"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link Label",
+          "default": "Learn more"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link URL"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Method Image"
+        },
+        {
+          "type": "text",
+          "id": "fallback_image_url",
+          "label": "Fallback Image URL (if no image picked)",
+          "default": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=1200&q=80"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "TWC Methods of Use",
+      "blocks": [
+        {
+          "type": "value_prop",
+          "settings": {
+            "preset_icon": "sourced",
+            "title": "Ethically Sourced",
+            "caption": "Roasted 4 hours after your order is placed"
+          }
+        },
+        {
+          "type": "value_prop",
+          "settings": {
+            "preset_icon": "roasted",
+            "title": "Roasted To Order",
+            "caption": "Roasted 4 hours after your order is placed"
+          }
+        },
+        {
+          "type": "value_prop",
+          "settings": {
+            "preset_icon": "sealed",
+            "title": "Sealed For Freshness",
+            "caption": "Sealed promptly after roast"
+          }
+        },
+        {
+          "type": "value_prop",
+          "settings": {
+            "preset_icon": "delivered",
+            "title": "Delivered Fresh",
+            "caption": "Roasts and ships the same day"
+          }
+        },
+        {
+          "type": "brewing_method",
+          "settings": {
+            "title": "Method 1 Name",
+            "time": "5 min",
+            "description": "<p>Lorem ipsum dolor sit amet, consectetur erat adipiscing elit. Donec erat urna, tincidunt neque gravida neque sed, fringilla commodo dui. Cras orci arcu, sodales id neque sit amet.</p>",
+            "link_label": "Learn more",
+            "fallback_image_url": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=1200&q=80"
+          }
+        },
+        {
+          "type": "brewing_method",
+          "settings": {
+            "title": "Method 2 Name",
+            "time": "4 min",
+            "description": "<p>French Press yields a rich, full-bodied cup by steeping coarsely ground beans directly in hot water before pressing down the fine stainless mesh filter.</p>",
+            "link_label": "Learn more",
+            "fallback_image_url": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=1200&q=80"
+          }
+        },
+        {
+          "type": "brewing_method",
+          "settings": {
+            "title": "Method 3 Name",
+            "time": "2.5 min",
+            "description": "<p>AeroPress leverages gentle air pressure to extract maximum flavor clarity with zero bitterness, perfect for both espresso-strength and delicate profiles.</p>",
+            "link_label": "Learn more",
+            "fallback_image_url": "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=1200&q=80"
+          }
+        },
+        {
+          "type": "brewing_method",
+          "settings": {
+            "title": "Method 4 Name",
+            "time": "6 min",
+            "description": "<p>Chemex uses bonded, ultra-dense filters to remove virtually all coffee oils and sediments, delivering an exceptionally pure, nuanced floral brew.</p>",
+            "link_label": "Learn more",
+            "fallback_image_url": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=80"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
