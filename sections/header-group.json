@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "type": "header",
   "name": "Header",
@@ -5,9 +14,23 @@
     "twc_header": {
       "type": "twc-header",
       "settings": {
-        "logo_width": 130,
-        "bg_color": "#EEE2E1",
-        "text_color": "#233342"
+        "logo": "shopify://shop_images/TWC-logo.png",
+        "logo_height": 130,
+        "logo_height_mobile": 100,
+        "left_menu": "main-menu",
+        "right_menu": "right-menu",
+        "mobile_header_icons": "account_search",
+        "show_account": true,
+        "show_cart": true,
+        "show_search": true,
+        "enable_sticky_header": false,
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "bg_color": "#eee2e1",
+        "text_color": "#233342",
+        "icon_color": "#a1a0a5",
+        "cart_badge_bg": "#2d3c4b",
+        "cart_badge_text": "#ffffff"
       }
     }
   },
