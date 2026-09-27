@@ -141,6 +141,19 @@
         "section_gap": 64
       }
     },
+    "twc_accurity_section": {
+      "type": "twc-accurity-section",
+      "settings": {
+        "heading": "100% ARABICA COFFEE, SOURCED RESPONSIBLY, ROASTED CAREFULLY.",
+        "content": "Our coffee is 100% Arabica and contains no preservatives or additives. We directly source it from farms, working closely with growers to make sure that your coffee is of the highest quality, grown sustainably and traded ethically. Our selections are specially roasted in our in-house, state-of-the-art roaster with specific profiles to ensure optimal flavour notes. True to our namesake, we pay close attention to every link in the supply chain and every detail of the coffee experience.",
+        "illustration_image": "shopify://shop_images/ProductCollection_100percentArabica.svg",
+        "photo_image": "shopify://shop_images/shop-page-img.webp",
+        "bg_color": "#d7d1c9",
+        "text_color": "#2d3c4b",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
     "product_recommendations_qggXJq": {
       "type": "product-recommendations",
       "blocks": {
@@ -210,12 +223,6 @@
         "background_color": "{{ settings.color_palette.background }}",
         "padding-block-start": 48,
         "padding-block-end": 48
-      }
-    },
-    "twc_accurity_section": {
-      "type": "twc-accurity-section",
-      "settings": {
-        "heading": "100% ARABICA COFFEE, SOURCED RESPONSIBLY, ROASTED CAREFULLY."
       }
     }
   },
