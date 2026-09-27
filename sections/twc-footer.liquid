@@ -1,0 +1,408 @@
+{%- doc -%}
+  Custom minimal Footer Section matching Third Wave Coffee Figma design.
+{%- enddoc -%}
+
+<div class="twc-footer-wrapper" style="--twc-footer-bg: {{ section.settings.bg_color | default: '#2b3b47' }}; --twc-footer-text: {{ section.settings.text_color | default: '#d5dde4' }};">
+  <footer class="twc-footer">
+    <div class="twc-footer__top">
+      <!-- Left Column: Newsletter & Cup Icon -->
+      <div class="twc-footer__left">
+        <div class="twc-footer__newsletter">
+          <h3 class="twc-footer__heading">{{ section.settings.newsletter_title | default: "DON'T BE A STRANGER." }}</h3>
+          {% form 'customer', class: 'twc-newsletter-form' %}
+            <input type="hidden" name="contact[tags]" value="newsletter">
+            <div class="twc-newsletter-input-group">
+              <input
+                type="email"
+                name="contact[email]"
+                class="twc-newsletter-input"
+                value="{{ form.email }}"
+                placeholder="{{ section.settings.newsletter_placeholder | default: 'Your email id' }}"
+                autocorrect="off"
+                autocapitalize="off"
+                autocomplete="email"
+                required
+              >
+              <button type="submit" class="twc-newsletter-btn" name="commit">
+                {{ section.settings.newsletter_btn | default: 'SIGN UP' }}
+              </button>
+            </div>
+            {%- if form.posted_successfully? -%}
+              <p class="twc-newsletter-success">Thanks for subscribing!</p>
+            {%- endif -%}
+          {% endform %}
+        </div>
+
+        <div class="twc-footer__cup-icon">
+          <svg width="68" height="60" viewBox="0 0 100 80" fill="none" stroke="currentColor" stroke-width="2.2">
+            <!-- Steam -->
+            <path d="M46 12 Q43 20 47 28" stroke-linecap="round"/>
+            <path d="M53 10 Q50 18 54 26" stroke-linecap="round"/>
+            <!-- Cup rim & body -->
+            <path d="M26 34 Q50 31 74 34 L71 58 Q50 72 29 58 Z" />
+            <!-- Coffee line inside -->
+            <ellipse cx="50" cy="38" rx="20" ry="5" />
+            <!-- Handle -->
+            <path d="M72 38 Q86 42 86 49 Q86 56 69 56" />
+            <!-- Saucer -->
+            <ellipse cx="50" cy="65" rx="34" ry="9" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Right Column: Navigation Links & Address -->
+      <div class="twc-footer__cols">
+        <!-- Col 1: Cafes -->
+        <div class="twc-footer__col">
+          <h4 class="twc-col-title">CAFES</h4>
+          <ul class="twc-footer-links">
+            <li><a href="#">Bangalore</a></li>
+            <li><a href="#">Delhi</a></li>
+            <li><a href="#">Hyderabad</a></li>
+            <li><a href="#">Pune</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 2: Policies -->
+        <div class="twc-footer__col">
+          <h4 class="twc-col-title">POLICIES</h4>
+          <ul class="twc-footer-links">
+            <li><a href="/policies/terms-of-service">Terms & Conditions</a></li>
+            <li><a href="/policies/privacy-policy">Privacy Policy</a></li>
+            <li><a href="/policies/shipping-policy">Shipping</a></li>
+            <li><a href="/policies/refund-policy">Returns & Cancellation</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Company -->
+        <div class="twc-footer__col">
+          <h4 class="twc-col-title">COMPANY</h4>
+          <ul class="twc-footer-links">
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Newsroom</a></li>
+            <li><a href="#">Partner with us</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Contact -->
+        <div class="twc-footer__col twc-footer__col--contact">
+          <h4 class="twc-col-title">CONTACT</h4>
+          <div class="twc-contact-info">
+            <p>2nd Floor, 2082<br>24th Main Rd Vanganahalli<br>1st Sector, HSR Layout,<br>Bengaluru 560102</p>
+            <p class="twc-contact-phones">
+              <a href="tel:0801234567890">080 12345 67890</a><br>
+              <a href="mailto:care@thirdwavecoffee.in">care@thirdwavecoffee.in</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <hr class="twc-footer__divider">
+
+    <!-- Bottom Bar: Socials, App Download, Copyright -->
+    <div class="twc-footer__bottom">
+      <div class="twc-footer__bottom-left">
+        <div class="twc-social-links">
+          <!-- Instagram -->
+          <a href="{{ section.settings.instagram | default: 'https://instagram.com' }}" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+          </a>
+          <!-- Facebook -->
+          <a href="{{ section.settings.facebook | default: 'https://facebook.com' }}" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+          </a>
+          <!-- YouTube -->
+          <a href="{{ section.settings.youtube | default: 'https://youtube.com' }}" target="_blank" rel="noopener" aria-label="YouTube">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43zM9.75 15.02V8.48l5.75 3.27-5.75 3.27z"/>
+            </svg>
+          </a>
+          <!-- Spotify -->
+          <a href="{{ section.settings.spotify | default: 'https://spotify.com' }}" target="_blank" rel="noopener" aria-label="Spotify">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.477 2 2 6.477 2 12c0 5.522 4.477 10 10 10s10-4.478 10-10c0-5.523-4.477-10-10-10zm4.586 14.424c-.18.295-.563.387-.857.208-2.35-1.435-5.308-1.76-8.792-.963-.334.077-.67-.13-.746-.465-.077-.334.13-.67.465-.747 3.808-.87 7.076-.496 9.722 1.11.294.18.386.563.208.857zm1.225-2.723c-.226.368-.71.485-1.078.26-2.69-1.654-6.79-2.133-9.97-1.167-.414.125-.85-.11-1.026-.523-.125-.413.11-.85.523-1.025 3.633-1.103 8.148-.568 11.29 1.367.368.226.485.71.26 1.078zm.105-2.835C14.692 8.95 9.375 8.775 6.297 9.71c-.495.15-1.02-.132-1.17-.627-.15-.494.132-1.02.627-1.17 3.535-1.073 9.404-.863 13.12 1.344.444.264.59.84.327 1.284-.264.443-.84.59-1.284.326z"/>
+            </svg>
+          </a>
+        </div>
+
+        <a href="{{ section.settings.app_link | default: '#' }}" class="twc-app-link">
+          DOWNLOAD THE TWC CAFE APP
+        </a>
+      </div>
+
+      <div class="twc-footer__copyright">
+        Copyright {{ 'now' | date: '%Y' }} Third Wave Coffee
+      </div>
+    </div>
+  </footer>
+</div>
+
+<style>
+  .twc-footer-wrapper {
+    background-color: var(--twc-footer-bg);
+    color: var(--twc-footer-text);
+    width: 100%;
+    font-size: 13px;
+    line-height: 1.6;
+    box-sizing: border-box;
+  }
+  .twc-footer {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 60px 48px 36px;
+    box-sizing: border-box;
+  }
+  .twc-footer__top {
+    display: flex;
+    justify-content: space-between;
+    gap: 60px;
+    align-items: flex-start;
+  }
+  .twc-footer__left {
+    flex: 0 0 340px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 200px;
+  }
+  .twc-footer__heading {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #ffffff;
+    margin: 0 0 16px 0;
+  }
+  .twc-newsletter-input-group {
+    display: flex;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: transparent;
+    max-width: 320px;
+  }
+  .twc-newsletter-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 10px 14px;
+    color: #ffffff;
+    font-size: 13px;
+    outline: none;
+  }
+  .twc-newsletter-input::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 12px;
+  }
+  .twc-newsletter-btn {
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 0 16px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background 0.2s;
+  }
+  .twc-newsletter-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+  .twc-newsletter-success {
+    color: #8ed081;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+  .twc-footer__cup-icon {
+    margin-top: 40px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .twc-footer__cols {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+  }
+  .twc-col-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #ffffff;
+    margin: 0 0 18px 0;
+    text-transform: uppercase;
+  }
+  .twc-footer-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .twc-footer-links a {
+    color: var(--twc-footer-text);
+    text-decoration: none;
+    font-size: 12.5px;
+    transition: color 0.2s;
+  }
+  .twc-footer-links a:hover {
+    color: #ffffff;
+  }
+  .twc-footer__col--contact p {
+    margin: 0 0 14px 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .twc-contact-phones a {
+    color: var(--twc-footer-text);
+    text-decoration: none;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .twc-contact-phones a:hover {
+    color: #ffffff;
+  }
+  .twc-footer__divider {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    margin: 40px 0 24px 0;
+  }
+  .twc-footer__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .twc-footer__bottom-left {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+  .twc-social-links {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .twc-social-links a {
+    color: var(--twc-footer-text);
+    display: inline-flex;
+    align-items: center;
+    transition: opacity 0.2s;
+  }
+  .twc-social-links a:hover {
+    color: #ffffff;
+    opacity: 0.85;
+  }
+  .twc-app-link {
+    color: #ffffff;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .twc-app-link:hover {
+    opacity: 0.8;
+  }
+  .twc-footer__copyright {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  @media (max-width: 900px) {
+    .twc-footer__top {
+      flex-direction: column;
+      gap: 36px;
+    }
+    .twc-footer__left {
+      flex: 1 1 100%;
+      min-height: auto;
+    }
+    .twc-footer__cup-icon {
+      margin-top: 20px;
+    }
+    .twc-footer__cols {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .twc-footer__bottom {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "TWC Footer",
+  "settings": [
+    {
+      "type": "text",
+      "id": "newsletter_title",
+      "label": "Newsletter Title",
+      "default": "DON'T BE A STRANGER."
+    },
+    {
+      "type": "text",
+      "id": "newsletter_placeholder",
+      "label": "Newsletter Placeholder",
+      "default": "Your email id"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_btn",
+      "label": "Button Label",
+      "default": "SIGN UP"
+    },
+    {
+      "type": "url",
+      "id": "app_link",
+      "label": "App Download Link"
+    },
+    {
+      "type": "text",
+      "id": "instagram",
+      "label": "Instagram URL"
+    },
+    {
+      "type": "text",
+      "id": "facebook",
+      "label": "Facebook URL"
+    },
+    {
+      "type": "text",
+      "id": "youtube",
+      "label": "YouTube URL"
+    },
+    {
+      "type": "text",
+      "id": "spotify",
+      "label": "Spotify URL"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#2b3b47"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#d5dde4"
+    }
+  ]
+}
+{% endschema %}

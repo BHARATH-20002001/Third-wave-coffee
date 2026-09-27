@@ -1,0 +1,1094 @@
+{%- doc -%}
+  Third Wave Coffee Header Section:
+  - Left navigation menu & Right navigation menu (selectable in theme)
+  - Centered brand logo with 130px height, 100% width
+  - Right container 1: Menu
+  - Right container 2: Quick links (Account, Cart text [10px #A1A0A5], Search)
+  - Main background #EEE2E1
+  - Menu font style: 14px Lato, sans-serif, #2D3C4B, 0px 15px padding, 400 font-weight
+  - Mobile version:
+    * Slide-in menu from left with background #2D3C4B and white font
+    * Close button (✕) and accordion submenus (+)
+    * Mobile right-side quick links: configurable to show Account and Search only (default)
+  - Fully optimized and minified runtime script with dynamic cart update
+{%- enddoc -%}
+
+<header
+  id="header-component"
+  class="twc-header-wrapper{% if section.settings.enable_sticky_header %} twc-header-wrapper--sticky{% endif %}"
+  style="
+    --twc-header-bg: {{ section.settings.bg_color | default: '#EEE2E1' }};
+    --twc-header-text: {{ section.settings.text_color | default: '#2D3C4B' }};
+    --twc-header-icon: {{ section.settings.icon_color | default: '#A1A0A5' }};
+    --twc-header-badge-bg: {{ section.settings.cart_badge_bg | default: '#2D3C4B' }};
+    --twc-header-badge-text: {{ section.settings.cart_badge_text | default: '#ffffff' }};
+    --twc-header-logo-height: {{ section.settings.logo_height | default: 130 }}px;
+    --twc-header-logo-height-mobile: {{ section.settings.logo_height_mobile | default: 70 }}px;
+    --twc-header-padding-top: {{ section.settings.padding_top | default: 0 }}px;
+    --twc-header-padding-bottom: {{ section.settings.padding_bottom | default: 0 }}px;
+  "
+>
+  <div class="twc-header">
+    <!-- Left Navigation Menu (Desktop) / Mobile Toggle -->
+    <div class="twc-header__left">
+      <button
+        type="button"
+        class="twc-header__mobile-toggle"
+        aria-label="Open navigation menu"
+        id="twc-drawer-open"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <nav class="twc-header__nav twc-header__nav--left" aria-label="Main Left Menu">
+        <ul class="twc-header__menu-list">
+          {%- if section.settings.left_menu != blank and linklists[section.settings.left_menu].links.size > 0 -%}
+            {%- for link in linklists[section.settings.left_menu].links -%}
+              <li class="twc-header__menu-item">
+                <a href="{{ link.url }}" class="twc-header__menu-link{% if link.current or link.child_active %} is-active{% endif %}">
+                  {{ link.title }}
+                </a>
+              </li>
+            {%- endfor -%}
+          {%- else -%}
+            <li class="twc-header__menu-item"><a href="{{ routes.all_products_collection_url }}" class="twc-header__menu-link is-active">SHOP</a></li>
+            <li class="twc-header__menu-item"><a href="#" class="twc-header__menu-link">LEARN &amp; DO</a></li>
+            <li class="twc-header__menu-item"><a href="#" class="twc-header__menu-link">CAFES</a></li>
+            <li class="twc-header__menu-item"><a href="#" class="twc-header__menu-link">SUBSCRIBE</a></li>
+          {%- endif -%}
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Center Brand Logo (130px height, 100% width) -->
+    <div class="twc-header__center">
+      <a href="{{ routes.root_url }}" class="twc-header__logo-link" aria-label="{{ shop.name }}">
+        {%- if section.settings.logo != blank -%}
+          <img
+            src="{{ section.settings.logo | image_url }}"
+            alt="{{ section.settings.logo.alt | default: shop.name | escape }}"
+            class="twc-header__logo-img"
+            width="{{ section.settings.logo.width }}"
+            height="{{ section.settings.logo_height | default: 130 }}"
+            loading="eager"
+          >
+        {%- else -%}
+          <svg class="twc-header__logo-svg" viewBox="0 0 240 130" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Third Wave Coffee">
+            <g transform="translate(85, 12)">
+              <path d="M6 14 Q35 11 64 14 L61 38 Q35 52 9 38 Z" fill="var(--twc-header-text, #233342)"/>
+              <path d="M63 18 Q76 21 76 27 Q76 33 60 35" stroke="var(--twc-header-text, #233342)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+              <ellipse cx="35" cy="14" rx="29" ry="5" fill="var(--twc-header-text, #233342)"/>
+              <path d="M12 18 Q23 13 35 18 Q47 23 58 17" stroke="var(--twc-header-bg, #EEE2E1)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <path d="M16 25 Q26 21 35 25 Q45 29 54 24" stroke="var(--twc-header-bg, #EEE2E1)" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </g>
+            <text x="120" y="86" text-anchor="middle" font-family="'Lato', sans-serif" font-size="17" font-weight="900" fill="var(--twc-header-text, #233342)" letter-spacing="1.5">THIRD WAVE<tspan font-size="10" dy="-6">®</tspan></text>
+            <text x="120" y="106" text-anchor="middle" font-family="'Lato', sans-serif" font-size="14" font-weight="900" fill="var(--twc-header-text, #233342)" letter-spacing="4">COFFEE</text>
+          </svg>
+        {%- endif -%}
+      </a>
+    </div>
+
+    <!-- Right Side Containers -->
+    <div class="twc-header__right">
+      <!-- Container 1: Right Menu (Desktop) -->
+      <nav class="twc-header__right-menu" aria-label="Right Menu">
+        <ul class="twc-header__menu-list">
+          {%- if section.settings.right_menu != blank and linklists[section.settings.right_menu].links.size > 0 -%}
+            {%- for link in linklists[section.settings.right_menu].links -%}
+              <li class="twc-header__menu-item">
+                <a href="{{ link.url }}" class="twc-header__menu-link{% if link.current or link.child_active %} is-active{% endif %}">
+                  {{ link.title }}
+                </a>
+              </li>
+            {%- endfor -%}
+          {%- else -%}
+            <li class="twc-header__menu-item"><a href="#" class="twc-header__menu-link">CONTACT</a></li>
+            <li class="twc-header__menu-item"><a href="#" class="twc-header__menu-link">ABOUT</a></li>
+          {%- endif -%}
+        </ul>
+      </nav>
+
+      <!-- Container 2: Quick Links (Desktop & Mobile) -->
+      <div class="twc-header__quick-links">
+        <!-- Desktop Quick Links: Account, Cart text, Search -->
+        <div class="twc-header__quick-desktop">
+          {%- if section.settings.show_account -%}
+            <a href="{{ routes.account_url | default: '/account' }}" class="twc-header__icon-btn" aria-label="Account">
+              {%- if section.settings.account_icon != blank -%}
+                <img src="{{ section.settings.account_icon | image_url: width: 44 }}" alt="Account" class="twc-header__custom-icon" width="20" height="20">
+              {%- else -%}
+                <svg class="twc-header__svg-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="6.5" r="2.75" stroke="currentColor" stroke-width="1.5"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m5.172 14.591-.437.786a.588.588 0 0 0 .514.873h9.502a.588.588 0 0 0 .514-.873l-.437-.786a5.523 5.523 0 0 0-9.656 0"/></svg>
+              {%- endif -%}
+            </a>
+          {%- endif -%}
+
+          {%- if section.settings.show_cart -%}
+            <button type="button" class="twc-header__cart-btn twc-cart-trigger header-actions__cart-icon" aria-label="Cart">
+              <span class="twc-header__cart-text">
+                CART [ <span class="twc-cart-count">{{ cart.item_count }}</span> ]
+              </span>
+            </button>
+          {%- endif -%}
+
+          {%- if section.settings.show_search -%}
+            <button type="button" class="twc-header__icon-btn twc-search-trigger" aria-label="Search">
+              {%- if section.settings.search_icon != blank -%}
+                <img src="{{ section.settings.search_icon | image_url: width: 44 }}" alt="Search" class="twc-header__custom-icon" width="20" height="20">
+              {%- else -%}
+                <svg class="twc-header__svg-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="9" cy="9" r="4.75" stroke="currentColor" stroke-width="1.5"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m12.5 12.5 3.25 3.25"/></svg>
+              {%- endif -%}
+            </button>
+          {%- endif -%}
+        </div>
+
+        <!-- Mobile Quick Links -->
+        <div class="twc-header__quick-mobile">
+          {%- case section.settings.mobile_header_icons -%}
+            {%- when 'cart_search' -%}
+              <!-- Cart Icon (Mobile) -->
+              <button type="button" class="twc-header__icon-btn twc-cart-trigger header-actions__cart-icon" aria-label="Cart">
+                <span class="twc-header__cart-icon-wrapper">
+                  {%- if section.settings.cart_icon != blank -%}
+                    <img src="{{ section.settings.cart_icon | image_url: width: 44 }}" alt="Cart" class="twc-header__custom-icon" width="20" height="20">
+                  {%- else -%}
+                    <svg class="twc-header__svg-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.392 6.875h13.216v8.016c0 .567-.224 1.112-.624 1.513-.4.402-.941.627-1.506.627H5.522a2.13 2.13 0 0 1-1.506-.627 2.15 2.15 0 0 1-.624-1.513zM8.818 2.969h2.333c.618 0 1.211.247 1.649.686a2.35 2.35 0 0 1 .683 1.658v1.562H6.486V5.313c0-.622.246-1.218.683-1.658a2.33 2.33 0 0 1 1.65-.686"/></svg>
+                  {%- endif -%}
+                  <span class="twc-header__cart-badge twc-cart-count">{{ cart.item_count }}</span>
+                </span>
+              </button>
+              <!-- Search Icon -->
+              <button type="button" class="twc-header__icon-btn twc-search-trigger" aria-label="Search">
+                {%- if section.settings.search_icon != blank -%}
+                  <img src="{{ section.settings.search_icon | image_url: width: 44 }}" alt="Search" class="twc-header__custom-icon" width="20" height="20">
+                {%- else -%}
+                  <svg class="twc-header__svg-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="9" cy="9" r="4.75" stroke="currentColor" stroke-width="1.5"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m12.5 12.5 3.25 3.25"/></svg>
+                {%- endif -%}
+              </button>
+
+            {%- when 'all' -%}
+              <a href="{{ routes.account_url | default: '/account' }}" class="twc-header__icon-btn" aria-label="Account">
+                {%- if section.settings.account_icon != blank -%}
+                  <img src="{{ section.settings.account_icon | image_url: width: 44 }}" alt="Account" class="twc-header__custom-icon" width="20" height="20">
+                {%- else -%}
+                  <svg class="twc-header__svg-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="6.5" r="2.75" stroke="currentColor" stroke-width="1.5"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m5.172 14.591-.437.786a.588.588 0 0 0 .514.873h9.502a.588.588 0 0 0 .514-.873l-.437-.786a5.523 5.523 0 0 0-9.656 0"/></svg>
+                {%- endif -%}
+              </a>
+              <button type="button" class="twc-header__icon-btn twc-cart-trigger header-actions__cart-icon" aria-label="Cart">
+                <span class="twc-header__cart-icon-wrapper">
+                  {%- if section.settings.cart_icon != blank -%}
+                    <img src="{{ section.settings.cart_icon | image_url: width: 44 }}" alt="Cart" class="twc-header__custom-icon" width="20" height="20">
+                  {%- else -%}
+                    <svg class="twc-header__svg-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.392 6.875h13.216v8.016c0 .567-.224 1.112-.624 1.513-.4.402-.941.627-1.506.627H5.522a2.13 2.13 0 0 1-1.506-.627 2.15 2.15 0 0 1-.624-1.513zM8.818 2.969h2.333c.618 0 1.211.247 1.649.686a2.35 2.35 0 0 1 .683 1.658v1.562H6.486V5.313c0-.622.246-1.218.683-1.658a2.33 2.33 0 0 1 1.65-.686"/></svg>
+                  {%- endif -%}
+                  <span class="twc-header__cart-badge twc-cart-count">{{ cart.item_count }}</span>
+                </span>
+              </button>
+              <button type="button" class="twc-header__icon-btn twc-search-trigger" aria-label="Search">
+                {%- if section.settings.search_icon != blank -%}
+                  <img src="{{ section.settings.search_icon | image_url: width: 44 }}" alt="Search" class="twc-header__custom-icon" width="20" height="20">
+                {%- else -%}
+                  <svg class="twc-header__svg-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="9" cy="9" r="4.75" stroke="currentColor" stroke-width="1.5"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m12.5 12.5 3.25 3.25"/></svg>
+                {%- endif -%}
+              </button>
+
+            {%- else -%}
+              <!-- Default: 'account_search' -> Show ONLY account and search option only -->
+              {%- if section.settings.show_account -%}
+                <a href="{{ routes.account_url | default: '/account' }}" class="twc-header__icon-btn" aria-label="Account">
+                  {%- if section.settings.account_icon != blank -%}
+                    <img src="{{ section.settings.account_icon | image_url: width: 44 }}" alt="Account" class="twc-header__custom-icon" width="20" height="20">
+                  {%- else -%}
+                    <svg class="twc-header__svg-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="6.5" r="2.75" stroke="currentColor" stroke-width="1.5"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m5.172 14.591-.437.786a.588.588 0 0 0 .514.873h9.502a.588.588 0 0 0 .514-.873l-.437-.786a5.523 5.523 0 0 0-9.656 0"/></svg>
+                  {%- endif -%}
+                </a>
+              {%- endif -%}
+              {%- if section.settings.show_search -%}
+                <button type="button" class="twc-header__icon-btn twc-search-trigger" aria-label="Search">
+                  {%- if section.settings.search_icon != blank -%}
+                    <img src="{{ section.settings.search_icon | image_url: width: 44 }}" alt="Search" class="twc-header__custom-icon" width="20" height="20">
+                  {%- else -%}
+                    <svg class="twc-header__svg-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="9" cy="9" r="4.75" stroke="currentColor" stroke-width="1.5"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m12.5 12.5 3.25 3.25"/></svg>
+                  {%- endif -%}
+                </button>
+              {%- endif -%}
+          {%- endcase -%}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Slide-In Drawer from Left (bg #2D3C4B, white font) -->
+  <div class="twc-drawer-overlay" id="twc-drawer-overlay"></div>
+  <div class="twc-mobile-drawer" id="twc-mobile-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
+    <div class="twc-drawer-header">
+      <button type="button" class="twc-drawer-close" id="twc-drawer-close" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="twc-drawer-nav">
+      <ul class="twc-drawer-list">
+        {%- if section.settings.left_menu != blank or section.settings.right_menu != blank -%}
+          {%- for link in linklists[section.settings.left_menu].links -%}
+            <li class="twc-drawer-item">
+              <div class="twc-drawer-row">
+                <a href="{{ link.url }}" class="twc-drawer-link">{{ link.title }}</a>
+                {%- if link.links.size > 0 -%}
+                  <button type="button" class="twc-drawer-acc-btn" aria-label="Toggle submenu" aria-expanded="false">+</button>
+                {%- endif -%}
+              </div>
+              {%- if link.links.size > 0 -%}
+                <ul class="twc-drawer-submenu">
+                  {%- for child_link in link.links -%}
+                    <li><a href="{{ child_link.url }}" class="twc-drawer-sublink">{{ child_link.title }}</a></li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+          {%- for link in linklists[section.settings.right_menu].links -%}
+            <li class="twc-drawer-item">
+              <div class="twc-drawer-row">
+                <a href="{{ link.url }}" class="twc-drawer-link">{{ link.title }}</a>
+                {%- if link.links.size > 0 -%}
+                  <button type="button" class="twc-drawer-acc-btn" aria-label="Toggle submenu" aria-expanded="false">+</button>
+                {%- endif -%}
+              </div>
+              {%- if link.links.size > 0 -%}
+                <ul class="twc-drawer-submenu">
+                  {%- for child_link in link.links -%}
+                    <li><a href="{{ child_link.url }}" class="twc-drawer-sublink">{{ child_link.title }}</a></li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        {%- else -%}
+          <!-- Default menu items matching shared image exactly -->
+          <li class="twc-drawer-item">
+            <div class="twc-drawer-row">
+              <a href="{{ routes.all_products_collection_url }}" class="twc-drawer-link">SHOP</a>
+              <button type="button" class="twc-drawer-acc-btn" aria-label="Toggle submenu" aria-expanded="false">+</button>
+            </div>
+            <ul class="twc-drawer-submenu">
+              <li><a href="/collections/coffee-beans" class="twc-drawer-sublink">COFFEE BEANS</a></li>
+              <li><a href="/collections/ready-to-drink" class="twc-drawer-sublink">EASY COFFEE &amp; RTD</a></li>
+              <li><a href="/collections/equipment" class="twc-drawer-sublink">BREWING EQUIPMENT</a></li>
+              <li><a href="/collections/merchandise" class="twc-drawer-sublink">MERCHANDISE</a></li>
+            </ul>
+          </li>
+          <li class="twc-drawer-item">
+            <div class="twc-drawer-row">
+              <a href="#" class="twc-drawer-link">LEARN &amp; DO</a>
+              <button type="button" class="twc-drawer-acc-btn" aria-label="Toggle submenu" aria-expanded="false">+</button>
+            </div>
+            <ul class="twc-drawer-submenu">
+              <li><a href="#" class="twc-drawer-sublink">BREW GUIDES</a></li>
+              <li><a href="#" class="twc-drawer-sublink">COFFEE STORIES</a></li>
+              <li><a href="#" class="twc-drawer-sublink">WORKSHOPS</a></li>
+            </ul>
+          </li>
+          <li class="twc-drawer-item">
+            <div class="twc-drawer-row">
+              <a href="#" class="twc-drawer-link">ABOUT</a>
+              <button type="button" class="twc-drawer-acc-btn" aria-label="Toggle submenu" aria-expanded="false">+</button>
+            </div>
+            <ul class="twc-drawer-submenu">
+              <li><a href="#" class="twc-drawer-sublink">OUR STORY</a></li>
+              <li><a href="#" class="twc-drawer-sublink">FARMS &amp; ROASTERY</a></li>
+            </ul>
+          </li>
+          <li class="twc-drawer-item">
+            <div class="twc-drawer-row">
+              <a href="#" class="twc-drawer-link">CONTACT</a>
+            </div>
+          </li>
+          <li class="twc-drawer-item">
+            <div class="twc-drawer-row">
+              <a href="#" class="twc-drawer-link">CAFES</a>
+            </div>
+          </li>
+        {%- endif -%}
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;600;700;900&display=swap');
+
+  .twc-header-wrapper {
+    background-color: var(--twc-header-bg, #EEE2E1);
+    width: 100%;
+    position: relative;
+    z-index: 100;
+    box-sizing: border-box;
+    padding-top: var(--twc-header-padding-top, 0px);
+    padding-bottom: var(--twc-header-padding-bottom, 0px);
+  }
+  .twc-header-wrapper--sticky {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+  }
+  .twc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 40px;
+    box-sizing: border-box;
+    min-height: var(--twc-header-logo-height, 130px);
+  }
+
+  /* Left Column */
+  .twc-header__left {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  /* Center Logo */
+  .twc-header__center {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--twc-header-logo-height, 130px);
+    padding: 0 20px;
+  }
+  .twc-header__logo-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--twc-header-logo-height, 130px);
+    width: 100%;
+    text-decoration: none;
+  }
+  .twc-header__logo-img {
+    height: var(--twc-header-logo-height, 130px);
+    width: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .twc-header__logo-svg {
+    height: var(--twc-header-logo-height, 130px);
+    width: 100%;
+    max-width: 220px;
+    display: block;
+  }
+
+  /* Right Column */
+  .twc-header__right {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 32px;
+    min-width: 0;
+  }
+  .twc-header__right-menu {
+    display: flex;
+    align-items: center;
+  }
+  .twc-header__quick-links {
+    display: flex;
+    align-items: center;
+  }
+  .twc-header__quick-desktop {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+  .twc-header__quick-mobile {
+    display: none;
+    align-items: center;
+    gap: 16px;
+  }
+
+  /* Navigation Links (14px Lato, #2D3C4B, padding 0px 15px, 400 weight) */
+  .twc-header__menu-list {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .twc-header__menu-item {
+    display: flex;
+    align-items: center;
+  }
+  .twc-header__menu-link {
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--twc-header-text, #2D3C4B);
+    padding: 0 20px;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: inline-flex;
+    align-items: center;
+    height: 80px;
+    transition: color 0.2s ease, opacity 0.2s ease;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+  .twc-header__menu-link:hover,
+  .twc-header__menu-link.is-active {
+    color: var(--twc-header-text, #2D3C4B);
+    text-decoration: underline;
+    text-underline-offset: 5px;
+    text-decoration-thickness: 1.5px;
+  }
+
+  /* Quick links Icons & Cart */
+  .twc-header__icon-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--twc-header-icon, #A1A0A5);
+    text-decoration: none;
+    width: 20px;
+    height: 20px;
+    transition: opacity 0.2s ease;
+    line-height: 1;
+  }
+  .twc-header__icon-btn:hover {
+    opacity: 0.7;
+  }
+  .twc-header__svg-icon {
+    width: 20px;
+    height: 20px;
+    stroke: var(--twc-header-icon, #A1A0A5);
+    color: var(--twc-header-icon, #A1A0A5);
+    display: block;
+  }
+  .twc-header__custom-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* Cart Button (Desktop text: 10px Lato, #A1A0A5) */
+  .twc-header__cart-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Lato', sans-serif;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+    line-height: 1;
+  }
+  .twc-header__cart-btn:hover {
+    opacity: 0.7;
+  }
+  .twc-header__cart-text {
+    color: var(--twc-header-icon, #A1A0A5);
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+  .twc-cart-count {
+    color: inherit;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: inherit;
+  }
+  .twc-header__cart-icon-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--twc-header-icon, #A1A0A5);
+  }
+  .twc-header__cart-badge {
+    position: absolute;
+    top: -7px;
+    right: -9px;
+    background-color: var(--twc-header-badge-bg, #2D3C4B);
+    color: var(--twc-header-badge-text, #ffffff);
+    font-size: 9px;
+    font-weight: 700;
+    font-family: 'Lato', sans-serif;
+    min-width: 16px;
+    height: 16px;
+    line-height: 16px;
+    border-radius: 50%;
+    text-align: center;
+    padding: 0 2px;
+    box-sizing: border-box;
+  }
+
+  /* Mobile Toggle */
+  .twc-header__mobile-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    padding: 8px 8px 8px 0;
+    cursor: pointer;
+    color: var(--twc-header-text, #2D3C4B);
+    margin-right: 12px;
+  }
+  .twc-header__mobile-toggle svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+  }
+
+  /* Mobile Slide-in Drawer (Matching shared image: bg #2D3C4B, white font) */
+  .twc-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 1000;
+  }
+  .twc-drawer-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+  .twc-mobile-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 78%;
+    max-width: 330px;
+    background-color: #2D3C4B;
+    color: #FFFFFF;
+    z-index: 1001;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 0 25px rgba(0,0,0,0.25);
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+  .twc-mobile-drawer.is-open {
+    transform: translateX(0);
+  }
+  .twc-drawer-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 24px 24px 10px;
+  }
+  .twc-drawer-close {
+    background: none;
+    border: none;
+    color: #FFFFFF;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s ease;
+  }
+  .twc-drawer-close:hover {
+    opacity: 0.8;
+  }
+  .twc-drawer-close svg {
+    width: 22px;
+    height: 22px;
+  }
+  .twc-drawer-nav {
+    padding: 10px 28px 36px;
+    flex: 1;
+  }
+  .twc-drawer-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .twc-drawer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+  }
+  .twc-drawer-link {
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFFFFF;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    flex: 1;
+    transition: opacity 0.2s ease;
+  }
+  .twc-drawer-link:hover {
+    opacity: 0.85;
+  }
+  .twc-drawer-acc-btn {
+    background: none;
+    border: none;
+    color: #FFFFFF;
+    font-family: 'Lato', sans-serif;
+    font-size: 24px;
+    line-height: 1;
+    font-weight: 300;
+    cursor: pointer;
+    padding: 0 4px;
+    transition: transform 0.2s ease;
+  }
+  .twc-drawer-submenu {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 12px 14px;
+    display: none;
+  }
+  .twc-drawer-item.is-expanded .twc-drawer-submenu {
+    display: block;
+  }
+  .twc-drawer-sublink {
+    display: block;
+    font-family: 'Lato', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 7px 0;
+    transition: color 0.2s ease;
+  }
+  .twc-drawer-sublink:hover {
+    color: #FFFFFF;
+  }
+
+  /* Compact Desktop / Small Laptop (769px — 1024px) */
+  @media only screen and (min-width: 769px) and (max-width: 1024px) {
+    .twc-header {
+      padding: 0 20px;
+    }
+    .twc-header__menu-link {
+      padding: 0 10px;
+      font-size: 11px;
+    }
+    .twc-header__right {
+      gap: 16px;
+    }
+  }
+
+  /* 481px — 768px: iPads, Tablets */
+  @media only screen and (min-width: 481px) and (max-width: 768px) {
+    .twc-header {
+      padding: 0 24px;
+      min-height: var(--twc-header-logo-height-mobile, 70px);
+    }
+    .twc-header__left,
+    .twc-header__right {
+      flex: 0 0 auto;
+    }
+    .twc-header__nav--left,
+    .twc-header__right-menu,
+    .twc-header__quick-desktop {
+      display: none;
+    }
+    .twc-header__quick-mobile {
+      display: flex;
+      gap: 16px;
+    }
+    .twc-header__mobile-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .twc-header__center {
+      flex: 1 1 auto;
+      height: var(--twc-header-logo-height-mobile, 70px);
+      padding: 0 12px;
+    }
+    .twc-header__logo-link {
+      height: var(--twc-header-logo-height-mobile, 70px);
+    }
+    .twc-header__logo-img,
+    .twc-header__logo-svg {
+      height: var(--twc-header-logo-height-mobile, 70px);
+      max-width: 170px;
+    }
+    .twc-mobile-drawer {
+      width: 55%;
+      max-width: 340px;
+    }
+  }
+
+  /* 320px — 480px: Mobile devices */
+  @media only screen and (min-width: 320px) and (max-width: 480px) {
+    .twc-header {
+      padding: 0 16px;
+      min-height: var(--twc-header-logo-height-mobile, 70px);
+    }
+    .twc-header__left,
+    .twc-header__right {
+      flex: 0 0 auto;
+    }
+    .twc-header__nav--left,
+    .twc-header__right-menu,
+    .twc-header__quick-desktop {
+      display: none;
+    }
+    .twc-header__quick-mobile {
+      display: flex;
+      gap: 12px;
+    }
+    .twc-header__mobile-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 8px;
+    }
+    .twc-header__center {
+      flex: 1 1 auto;
+      height: var(--twc-header-logo-height-mobile, 70px);
+      padding: 0 6px;
+    }
+    .twc-header__logo-link {
+      height: var(--twc-header-logo-height-mobile, 70px);
+    }
+    .twc-header__logo-img,
+    .twc-header__logo-svg {
+      height: var(--twc-header-logo-height-mobile, 70px);
+      max-width: 140px;
+    }
+    .twc-mobile-drawer {
+      width: 82%;
+      max-width: 320px;
+    }
+  }
+
+  /* Ultra-compact screens (< 320px) */
+  @media only screen and (max-width: 319px) {
+    .twc-header {
+      padding: 0 10px;
+      min-height: var(--twc-header-logo-height-mobile, 70px);
+    }
+    .twc-header__left,
+    .twc-header__right {
+      flex: 0 0 auto;
+    }
+    .twc-header__nav--left,
+    .twc-header__right-menu,
+    .twc-header__quick-desktop {
+      display: none;
+    }
+    .twc-header__quick-mobile {
+      display: flex;
+      gap: 8px;
+    }
+    .twc-header__mobile-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 4px;
+    }
+    .twc-header__center {
+      flex: 1 1 auto;
+      height: var(--twc-header-logo-height-mobile, 70px);
+      padding: 0 4px;
+    }
+    .twc-header__logo-link {
+      height: var(--twc-header-logo-height-mobile, 70px);
+    }
+    .twc-header__logo-img,
+    .twc-header__logo-svg {
+      height: var(--twc-header-logo-height-mobile, 70px);
+      max-width: 110px;
+    }
+    .twc-mobile-drawer {
+      width: 90%;
+    }
+  }
+</style>
+
+<script>
+  (function(){
+    // 1. Efficient Cart Count Synchronization
+    function setCounts(c){
+      if(c!=null) document.querySelectorAll('.twc-cart-count').forEach(function(el){ el.textContent = c; });
+    }
+    function fetchCart(){
+      fetch((window.Shopify?.routes?.root || '/') + 'cart.js')
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d){ if(d && typeof d.item_count === 'number') setCounts(d.item_count); })
+        .catch(function(){});
+    }
+    document.addEventListener('shopify:cart:lines-update', function(e){
+      if(typeof e.detail?.itemCount === 'number') setCounts(e.detail.itemCount);
+      else if(e.promise) e.promise.then(function(r){
+        var n = r?.cart?.totalQuantity ?? r?.cart?.item_count ?? r?.detail?.itemCount;
+        n !== undefined ? setCounts(n) : fetchCart();
+      }).catch(fetchCart);
+      else fetchCart();
+    });
+    ['cart:updated','cart:refresh','cart-update'].forEach(function(ev){ document.addEventListener(ev, fetchCart); });
+    var _fetch = window.fetch;
+    window.fetch = async function(){
+      var res = await _fetch.apply(this, arguments);
+      try {
+        var u = typeof arguments[0] === 'string' ? arguments[0] : (arguments[0]?.url || '');
+        if(/\/cart\/(add|change|clear|update)/.test(u)) setTimeout(fetchCart, 350);
+      } catch(e){}
+      return res;
+    };
+    window.addEventListener('pageshow', function(e){ if(e.persisted) fetchCart(); });
+
+    // 2. Mobile Slide-In Drawer Logic
+    var drawer = document.getElementById('twc-mobile-drawer');
+    var overlay = document.getElementById('twc-drawer-overlay');
+    function toggleDrawer(open){
+      if(!drawer || !overlay) return;
+      var state = open !== undefined ? open : !drawer.classList.contains('is-open');
+      drawer.classList.toggle('is-open', state);
+      overlay.classList.toggle('is-open', state);
+      document.body.style.overflow = state ? 'hidden' : '';
+    }
+    document.getElementById('twc-drawer-open')?.addEventListener('click', function(){ toggleDrawer(true); });
+    document.getElementById('twc-drawer-close')?.addEventListener('click', function(){ toggleDrawer(false); });
+    overlay?.addEventListener('click', function(){ toggleDrawer(false); });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') toggleDrawer(false); });
+
+    // 3. Submenu Accordion Toggles (+)
+    document.querySelectorAll('.twc-drawer-acc-btn').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        var item = btn.closest('.twc-drawer-item');
+        if(!item) return;
+        var expanded = item.classList.toggle('is-expanded');
+        btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        btn.textContent = expanded ? '−' : '+';
+      });
+    });
+
+    // 4. Cart Drawer & Search Modal Delegation
+    document.addEventListener('click', function(e){
+      var cBtn = e.target.closest('.twc-cart-trigger');
+      if(cBtn){
+        var cd = document.getElementById('cart-drawer');
+        if(cd){
+          if(typeof cd.show === 'function') cd.show();
+          else cd.toggleAttribute('open');
+        } else {
+          window.location.href = '{{ routes.cart_url }}';
+        }
+        return;
+      }
+      var sBtn = e.target.closest('.twc-search-trigger');
+      if(sBtn){
+        var sm = document.getElementById('search-modal');
+        var d = sm?.querySelector('dialog');
+        if(d?.showModal) try { d.showModal(); } catch(_){}
+        else window.location.href = '{{ routes.search_url }}';
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "TWC Header",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image"
+    },
+    {
+      "type": "range",
+      "id": "logo_height",
+      "label": "Desktop logo height",
+      "min": 40,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "default": 130
+    },
+    {
+      "type": "range",
+      "id": "logo_height_mobile",
+      "label": "Mobile logo height",
+      "min": 30,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 70
+    },
+    {
+      "type": "header",
+      "content": "Navigation Menus"
+    },
+    {
+      "type": "link_list",
+      "id": "left_menu",
+      "label": "Left menu"
+    },
+    {
+      "type": "link_list",
+      "id": "right_menu",
+      "label": "Right menu"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Navigation & Quick Links"
+    },
+    {
+      "type": "select",
+      "id": "mobile_header_icons",
+      "label": "Mobile right side icons",
+      "options": [
+        {
+          "value": "account_search",
+          "label": "Account & Search only"
+        },
+        {
+          "value": "cart_search",
+          "label": "Cart & Search only (as in image)"
+        },
+        {
+          "value": "all",
+          "label": "Account, Cart & Search"
+        }
+      ],
+      "default": "account_search"
+    },
+    {
+      "type": "header",
+      "content": "Quick Links & Utilities"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "Show account icon",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "account_icon",
+      "label": "Custom account icon (optional)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cart",
+      "label": "Show cart",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "cart_icon",
+      "label": "Custom mobile cart icon (optional)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "Show search icon",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "search_icon",
+      "label": "Custom search icon (optional)"
+    },
+    {
+      "type": "header",
+      "content": "Layout & Behavior"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky_header",
+      "label": "Enable sticky header",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#EEE2E1"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Menu text color",
+      "default": "#2D3C4B"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icons & cart text color",
+      "default": "#A1A0A5"
+    },
+    {
+      "type": "color",
+      "id": "cart_badge_bg",
+      "label": "Mobile cart badge background",
+      "default": "#2D3C4B"
+    },
+    {
+      "type": "color",
+      "id": "cart_badge_text",
+      "label": "Mobile cart badge text",
+      "default": "#FFFFFF"
+    }
+  ],
+  "presets": [
+    {
+      "name": "TWC Header"
+    }
+  ]
+}
+{% endschema %}
