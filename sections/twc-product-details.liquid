@@ -1,0 +1,2106 @@
+{%- doc -%}
+  Third Wave Coffee - Custom Product Details Section
+  - Left column:
+      * Dusty rose background card for product image with increased height (+100px)
+      * Hover zoom lens with real-time cursor tracking
+      * Slide-in animation on slide change with higher z-index (10)
+      * 4 dots indicator centered at the bottom of the image card
+  - Right column:
+      * Breadcrumbs (12px Lato, #24394A, underlined links)
+      * Product Title (25px Lato, 800 weight, uppercase, margin 40px 0 20px)
+      * Flavor notes / Subtitle (18px Lato, #883434, bold, margin 0 0 14px)
+      * Rich product description (15px Angsana New, #25394A)
+      * Roast profile: 4 dots indicator + roast/coffee type text in #883434
+      * GRIND TYPE dropdown with "Guide" modal trigger
+      * Dual column: SIZE dropdown & QUANTITY stepper (- 01 +)
+      * Price display with live quantity multiplier
+      * Dual CTA buttons (container width 400px): ADD TO CART → and BUY NOW → with custom SVG
+      * "Subscribe and save!" link
+      * 2-column meta footer: "Suitable for :" and "Pairs great with a TWC:"
+  - Max-width 1440px matching the header layout, 130px gap on desktop, background #EEE2E1
+{%- enddoc -%}
+
+{%- liquid
+  # Resolve product object: on product template, global product or closest.product is available
+  assign current_product = product | default: closest.product
+
+  # Dynamic Product Title: prioritize current_product.title (no fallback strings)
+  assign product_title = current_product.title
+  if product_title == blank
+    assign product_title = section.settings.title
+  endif
+
+  # 1. Product Subtitle: descriptors.subtitle (Single line text) or custom metafields
+  assign product_subtitle = current_product.metafields.descriptors.subtitle.value
+  if product_subtitle == blank
+    assign product_subtitle = current_product.metafields.descriptors.subtitle
+  endif
+  if product_subtitle == blank
+    assign product_subtitle = current_product.metafields.custom.subtitle.value | default: current_product.metafields.custom.subtitle
+  endif
+  if product_subtitle == blank
+    assign product_subtitle = current_product.metafields.custom.flavor_notes.value | default: current_product.metafields.custom.flavor_notes
+  endif
+  if product_subtitle == blank
+    assign product_subtitle = current_product.metafields.custom.product_subtitle.value | default: current_product.metafields.custom.product_subtitle
+  endif
+  if product_subtitle == blank
+    assign product_subtitle = section.settings.flavor_notes
+  endif
+
+  # Dynamic Product Description: prioritize current_product.description
+  assign product_desc = current_product.description
+  if product_desc == blank
+    assign product_desc = current_product.metafields.custom.short_description.value | default: current_product.metafields.custom.short_description | default: current_product.metafields.custom.description.value | default: current_product.metafields.custom.description
+  endif
+  if product_desc == blank
+    assign product_desc = section.settings.description
+  endif
+
+  # 2. Roast Level: custom.roast_level (Integer)
+  assign roast_level = current_product.metafields.custom.roast_level.value | default: current_product.metafields.custom.roast_level
+  if roast_level != blank
+    assign roast_level_num = roast_level | plus: 0
+  else
+    assign roast_level_num = 0
+  endif
+
+  # 3. Roast Type: custom.roast_type (Single line text)
+  assign roast_type = current_product.metafields.custom.roast_type.value | default: current_product.metafields.custom.roast_type
+
+  # 4. Coffee Type: custom.coffee_type (Single line text)
+  assign coffee_type = current_product.metafields.custom.coffee_type.value | default: current_product.metafields.custom.coffee_type
+
+  assign current_variant = current_product.selected_or_first_available_variant
+  if current_variant and current_variant.price > 0
+    assign price_display = current_variant.price | money_without_trailing_zeros
+  elsif current_product.price and current_product.price > 0
+    assign price_display = current_product.price | money_without_trailing_zeros
+  else
+    assign price_display = section.settings.price
+  endif
+
+  # Free delivery note
+  assign free_delivery_text = current_product.metafields.custom.free_delivery_text.value | default: section.settings.free_delivery_text
+
+  # Bottom Meta Details
+  assign raw_suitable_for = current_product.metafields.custom.suitable_for.value | default: current_product.metafields.custom.suitable_for
+  if raw_suitable_for != blank
+    if raw_suitable_for.first != blank
+      assign suitable_for_text = raw_suitable_for | join: ', '
+    else
+      assign suitable_for_text = raw_suitable_for
+    endif
+  else
+    assign suitable_for_text = section.settings.default_suitable_for
+  endif
+
+  assign raw_pairs_with = current_product.metafields.custom.great_with_twc.value | default: current_product.metafields.custom.great_with_twc | default: current_product.metafields.custom.pairs_with.value | default: current_product.metafields.custom.pairs_with | default: current_product.metafields.custom.pairs_great_with.value | default: current_product.metafields.custom.pairs_great_with
+  if raw_pairs_with != blank
+    if raw_pairs_with.first != blank
+      assign pairs_with_text = raw_pairs_with | join: ', '
+    else
+      assign pairs_with_text = raw_pairs_with
+    endif
+  else
+    assign pairs_with_text = section.settings.default_pairs_with
+  endif
+
+  assign subscribe_text = section.settings.subscribe_text | default: "Subscribe and save!"
+  assign subscribe_url = section.settings.subscribe_url | default: "#subscribe"
+
+  # Resolve Media / Images
+  assign product_media = current_product.media | default: current_product.images
+  assign has_real_images = false
+  if product_media.size > 0
+    assign has_real_images = true
+    assign total_slides = product_media.size
+  else
+    assign total_slides = 4
+  endif
+
+  # Resolve Grind Sizes (strictly from metafields or options, no fallback list)
+  assign raw_grind_sizes = current_product.metafields.custom.grind_sizes.value | default: current_product.metafields.custom.grind_sizes | default: current_product.metafields.custom.grind_size.value | default: current_product.metafields.custom.grind_size
+  assign grind_options_list = blank
+
+  if raw_grind_sizes != blank
+    if raw_grind_sizes.first != blank
+      assign grind_options_list = raw_grind_sizes
+    else
+      assign grind_options_list = raw_grind_sizes | split: ','
+    endif
+  else
+    for opt in current_product.options_with_values
+      assign opt_name_down = opt.name | downcase
+      if opt_name_down contains 'grind'
+        assign grind_options_list = opt.values
+        break
+      endif
+    endfor
+  endif
+-%}
+
+<section
+  id="twc-product-{{ section.id }}"
+  class="twc-product-section"
+  style="
+    --twc-p-bg: {{ section.settings.bg_color | default: '#EEE2E1' }};
+    --twc-p-card-bg: {{ section.settings.card_bg | default: '#cfadab' }};
+    --twc-p-navy: {{ section.settings.navy_color | default: '#2D3C4B' }};
+    --twc-p-btn-bg: {{ section.settings.btn_bg | default: '#2D3C4B' }};
+    --twc-p-mauve: {{ section.settings.mauve_color | default: '#883434' }};
+    --twc-p-text-muted: #4A5560;
+    --twc-p-select-bg: {{ section.settings.select_bg | default: '#EAE0DF' }};
+  "
+>
+  <div class="twc-product-container">
+    <!-- Left Column: Gallery / Carousel -->
+    <div class="twc-product__gallery-col">
+      <div
+        class="twc-product__gallery-box"
+        id="twc-gallery-box-{{ section.id }}"
+        aria-label="Product Image Gallery (Hover to zoom)"
+      >
+        <!-- Carousel Track -->
+        <div class="twc-gallery__track" id="twc-gallery-track-{{ section.id }}">
+          {%- if has_real_images -%}
+            {%- for media in product_media -%}
+              <div
+                class="twc-gallery__slide{% if forloop.first %} is-active{% endif %}"
+                data-index="{{ forloop.index0 }}"
+                data-media-id="{{ media.id }}"
+              >
+                {%- if media.media_type == 'image' or media.preview_image -%}
+                  <img
+                    src="{{ media | image_url: width: 1200 }}"
+                    alt="{{ media.alt | default: product_title | escape }}"
+                    class="twc-gallery__img"
+                    loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                    width="{{ media.width | default: 600 }}"
+                    height="{{ media.height | default: 600 }}"
+                  >
+                {%- else -%}
+                  {{ media | media_tag: class: 'twc-gallery__img' }}
+                {%- endif -%}
+              </div>
+            {%- endfor -%}
+          {%- else -%}
+            <!-- Fallback Static 4 Slides only when product has no images -->
+            <div class="twc-gallery__slide is-active" data-index="0">
+              <img src="{{ 'twc-vienna-roast-1.jpg' | asset_url }}" alt="{{ product_title }} - View 1" class="twc-gallery__img" loading="eager" width="600" height="600">
+            </div>
+            <div class="twc-gallery__slide" data-index="1">
+              <img src="{{ 'twc-vienna-roast-2.jpg' | asset_url }}" alt="{{ product_title }} - View 2" class="twc-gallery__img" loading="lazy" width="600" height="600">
+            </div>
+            <div class="twc-gallery__slide" data-index="2">
+              <img src="{{ 'twc-vienna-roast-3.jpg' | asset_url }}" alt="{{ product_title }} - View 3" class="twc-gallery__img" loading="lazy" width="600" height="600">
+            </div>
+            <div class="twc-gallery__slide" data-index="3">
+              <img src="{{ 'twc-vienna-roast-4.jpg' | asset_url }}" alt="{{ product_title }} - View 4" class="twc-gallery__img" loading="lazy" width="600" height="600">
+            </div>
+          {%- endif -%}
+        </div>
+
+        {%- if total_slides > 1 -%}
+          <!-- Navigation Arrows (subtle on hover) -->
+          <button
+            type="button"
+            class="twc-gallery__nav-arrow twc-gallery__nav-arrow--prev"
+            id="twc-prev-{{ section.id }}"
+            aria-label="Previous image"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            class="twc-gallery__nav-arrow twc-gallery__nav-arrow--next"
+            id="twc-next-{{ section.id }}"
+            aria-label="Next image"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        {%- endif -%}
+
+        <!-- Pagination Dots Inside Card at Bottom -->
+        {%- if total_slides > 1 -%}
+          <div class="twc-gallery__dots" id="twc-dots-{{ section.id }}" role="tablist" aria-label="Product Image Carousel Navigation">
+            {%- for i in (1..total_slides) -%}
+              {%- assign dot_index = forloop.index0 -%}
+              <button
+                type="button"
+                class="twc-gallery__dot{% if forloop.first %} is-active{% endif %}"
+                data-index="{{ dot_index }}"
+                aria-label="Go to slide {{ forloop.index }}"
+              ></button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <!-- Right Column: Product Information -->
+    <div class="twc-product__info-col">
+      <!-- 1. Breadcrumbs -->
+      {%- liquid
+        assign current_collection = collection | default: current_product.collections.first
+      -%}
+      <nav class="twc-breadcrumbs" aria-label="Breadcrumb">
+        <a href="{{ routes.all_products_collection_url }}" class="twc-breadcrumb__item">SHOP</a>
+        <span class="twc-breadcrumb__sep">&gt;</span>
+        {%- if current_collection != blank -%}
+          <a href="{{ current_collection.url }}" class="twc-breadcrumb__item">{{ current_collection.title | upcase }}</a>
+          <span class="twc-breadcrumb__sep">&gt;</span>
+        {%- elsif current_product.type != blank -%}
+          <a href="{{ routes.all_products_collection_url }}?filter.p.product_type={{ current_product.type | url_encode }}" class="twc-breadcrumb__item">{{ current_product.type | upcase }}</a>
+          <span class="twc-breadcrumb__sep">&gt;</span>
+        {%- else -%}
+          <a href="{{ routes.all_products_collection_url }}" class="twc-breadcrumb__item">COFFEE</a>
+          <span class="twc-breadcrumb__sep">&gt;</span>
+        {%- endif -%}
+        {%- if product_title != blank -%}
+          <span class="twc-breadcrumb__item twc-breadcrumb__item--current">{{ product_title }}</span>
+        {%- endif -%}
+      </nav>
+
+      <!-- 2. Product Title -->
+      {%- if product_title != blank -%}
+        <h1 class="twc-product__title">{{ product_title }}</h1>
+      {%- endif -%}
+
+      <!-- 3. Flavor Notes / Subtitle -->
+      {%- if product_subtitle != blank -%}
+        <div class="twc-product__flavor-notes">{{ product_subtitle }}</div>
+      {%- endif -%}
+
+      <!-- 4. Description -->
+      {%- if product_desc != blank -%}
+        <div class="twc-product__description">
+          {{ product_desc }}
+        </div>
+      {%- endif -%}
+
+      <!-- 5. Roast Profile -->
+      {%- if roast_level_num > 0 or roast_type != blank or coffee_type != blank -%}
+        <div class="twc-product__roast-row">
+          {%- if roast_level_num > 0 -%}
+            <div class="twc-roast-indicator" title="Roast Level: {{ roast_type }}{% if roast_level_num > 0 %} ({{ roast_level_num }} of 4){% endif %}">
+              <span class="twc-roast-dot{% if roast_level_num >= 1 %} is-filled{% endif %}"></span>
+              <span class="twc-roast-dot{% if roast_level_num >= 2 %} is-filled{% endif %}"></span>
+              <span class="twc-roast-dot{% if roast_level_num >= 3 %} is-filled{% endif %}"></span>
+              <span class="twc-roast-dot{% if roast_level_num >= 4 %} is-filled{% endif %}"></span>
+            </div>
+          {%- endif -%}
+          {%- if roast_type != blank or coffee_type != blank -%}
+            <span class="twc-roast-text">
+              {%- if roast_type != blank and coffee_type != blank -%}
+                {{ roast_type }} &nbsp;|&nbsp; {{ coffee_type }}
+              {%- elsif roast_type != blank -%}
+                {{ roast_type }}
+              {%- else -%}
+                {{ coffee_type }}
+              {%- endif -%}
+            </span>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      <!-- Product Purchase Form -->
+      <form
+        method="post"
+        action="{{ routes.cart_add_url }}"
+        id="twc-product-form-{{ section.id }}"
+        class="twc-product-form"
+        enctype="multipart/form-data"
+      >
+        <!-- 6. GRIND TYPE Dropdown with Guide link -->
+        {%- if grind_options_list != blank -%}
+          <div class="twc-field-group">
+            <div class="twc-field-header">
+              <label for="twc-grind-select-{{ section.id }}" class="twc-field-label">GRIND TYPE</label>
+              <button
+                type="button"
+                class="twc-guide-btn"
+                id="twc-open-guide-{{ section.id }}"
+                aria-haspopup="dialog"
+              >
+                Guide
+              </button>
+            </div>
+
+            <div class="twc-select-container">
+              <select
+                id="twc-grind-select-{{ section.id }}"
+                name="properties[Grind Size]"
+                class="twc-select"
+              >
+                {%- for grind in grind_options_list -%}
+                  {%- assign g_clean = grind | strip -%}
+                  <option value="{{ g_clean | escape }}" {% if forloop.first %}selected{% endif %}>{{ g_clean }}</option>
+                {%- endfor -%}
+              </select>
+              <span class="twc-select-caret" aria-hidden="true">
+                <svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 1.5L6 6.5L11 1.5"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+        {%- endif -%}
+
+        <!-- 7. Dual Fields: SIZE & QUANTITY Stepper -->
+        <div class="twc-dual-fields">
+          <!-- Size Column (Shopify Variant Selection) -->
+          <div class="twc-field-col">
+            <label for="twc-size-select-{{ section.id }}" class="twc-field-label">
+              {%- if current_product.variants.size > 0 and current_product.options.size > 0 and current_product.has_only_default_variant == false -%}
+                {{ current_product.options.first | upcase }}
+              {%- else -%}
+                SIZE
+              {%- endif -%}
+            </label>
+            <div class="twc-select-container">
+              <select
+                id="twc-size-select-{{ section.id }}"
+                name="id"
+                class="twc-select"
+              >
+                {%- if current_product.variants.size > 0 -%}
+                  {%- for variant in current_product.variants -%}
+                    <option
+                      value="{{ variant.id }}"
+                      data-price="{{ variant.price | money_without_trailing_zeros }}"
+                      data-raw-price="{{ variant.price }}"
+                      data-available="{{ variant.available }}"
+                      data-media-id="{{ variant.featured_media.id }}"
+                      {% if variant == current_variant %}selected{% endif %}
+                      {% unless variant.available %}disabled{% endunless %}
+                    >
+                      {%- if variant.title == 'Default Title' -%}
+                        {{ current_product.metafields.custom.size.value | default: 'Standard' }}
+                      {%- else -%}
+                        {{ variant.title }}
+                      {%- endif -%}
+                      {%- unless variant.available %} - Sold out{%- endunless -%}
+                    </option>
+                  {%- endfor -%}
+                {%- else -%}
+                  <option value="" data-price="{{ price_display }}" data-raw-price="{{ current_product.price | default: 0 }}" data-available="true" selected>Standard</option>
+                {%- endif -%}
+              </select>
+              <span class="twc-select-caret" aria-hidden="true">
+                <svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 1.5L6 6.5L11 1.5"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+
+          <!-- Quantity Stepper Box (- 01 +) -->
+          <div class="twc-field-col">
+            <label class="twc-field-label">QUANTITY</label>
+            <div class="twc-stepper-container">
+              <button
+                type="button"
+                class="twc-stepper-btn twc-stepper-btn--minus"
+                id="twc-qty-minus-{{ section.id }}"
+                aria-label="Decrease quantity"
+              >
+                &minus;
+              </button>
+              <span class="twc-stepper-val" id="twc-qty-display-{{ section.id }}">01</span>
+              <button
+                type="button"
+                class="twc-stepper-btn twc-stepper-btn--plus"
+                id="twc-qty-plus-{{ section.id }}"
+                aria-label="Increase quantity"
+              >
+                &#43;
+              </button>
+              <input
+                type="hidden"
+                name="quantity"
+                id="twc-qty-input-{{ section.id }}"
+                value="1"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. Price Display (twc-per-gram removed) -->
+        {%- if price_display != blank -%}
+          <div class="twc-price-wrapper">
+            <div class="twc-price-line">
+              <span
+                class="twc-main-price"
+                id="twc-main-price-{{ section.id }}"
+                data-currency-symbol="{{ cart.currency.symbol | default: 'Rs. ' }}"
+              >
+                {{- price_display -}}
+              </span>
+            </div>
+            {%- if free_delivery_text != blank -%}
+              <p class="twc-delivery-note">{{ free_delivery_text }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        <!-- 9. CTA Buttons (ADD TO CART and BUY NOW) in 400px Container -->
+        <div class="twc-buttons-row">
+          <!-- Add to Cart Button -->
+          <button
+            type="submit"
+            name="add"
+            class="twc-action-btn twc-action-btn--cart"
+            id="twc-add-btn-{{ section.id }}"
+            {% if current_variant and current_variant.available == false %}disabled style="opacity:0.5;cursor:not-allowed;"{% endif %}
+          >
+            <span class="twc-action-btn__text">
+              {%- if current_variant and current_variant.available == false -%}
+                SOLD OUT
+              {%- else -%}
+                ADD TO CART
+              {%- endif -%}
+            </span>
+            <svg class="twc-action-btn__arrow" xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21.0 21.0"><g><g transform="translate(-116.975,-153)"><path fill="var(--twc-p-bg, #EEE2E1)" d="m 132.975,170 c -0.274,0 -0.497,-0.221 -0.5,-0.495 -0.017,-1.674 0.626,-4.733 2.981,-6.005 -2.355,-1.271 -2.998,-4.331 -2.981,-6.005 0.003,-0.274 0.226,-0.495 0.5,-0.495 0.001,0 0.003,0 0.004,0 0.276,0.003 0.498,0.229 0.496,0.505 -0.001,0.198 0.004,4.867 3.587,5.503 0.239,0.042 0.413,0.25 0.413,0.492 0,0.242 -0.174,0.45 -0.413,0.492 -3.595,0.638 -3.588,5.453 -3.587,5.503 0.003,0.276 -0.219,0.502 -0.495,0.505 -10e-4,0 -0.003,0 -0.005,0 z"></path></g><g transform="translate(-121,-152)"><path fill="var(--twc-p-bg, #EEE2E1)" d="m 141,163 h -19 c -0.276,0 -0.5,-0.225 -0.5,-0.5 0,-0.275 0.224,-0.5 0.5,-0.5 h 19 c 0.276,0 0.5,0.225 0.5,0.5 0,0.275 -0.224,0.5 -0.5,0.5 z"></path></g></g></svg>
+          </button>
+
+          <!-- Buy Now Button -->
+          <button
+            type="button"
+            class="twc-action-btn twc-action-btn--buynow"
+            id="twc-buynow-btn-{{ section.id }}"
+            {% if current_variant and current_variant.available == false %}disabled style="display:none;"{% endif %}
+          >
+            <span class="twc-action-btn__text">BUY NOW</span>
+            <svg class="twc-action-btn__arrow" xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21.0 21.0"><g><g transform="translate(-116.975,-153)"><path fill="var(--twc-p-bg, #EEE2E1)" d="m 132.975,170 c -0.274,0 -0.497,-0.221 -0.5,-0.495 -0.017,-1.674 0.626,-4.733 2.981,-6.005 -2.355,-1.271 -2.998,-4.331 -2.981,-6.005 0.003,-0.274 0.226,-0.495 0.5,-0.495 0.001,0 0.003,0 0.004,0 0.276,0.003 0.498,0.229 0.496,0.505 -0.001,0.198 0.004,4.867 3.587,5.503 0.239,0.042 0.413,0.25 0.413,0.492 0,0.242 -0.174,0.45 -0.413,0.492 -3.595,0.638 -3.588,5.453 -3.587,5.503 0.003,0.276 -0.219,0.502 -0.495,0.505 -10e-4,0 -0.003,0 -0.005,0 z"></path></g><g transform="translate(-121,-152)"><path fill="var(--twc-p-bg, #EEE2E1)" d="m 141,163 h -19 c -0.276,0 -0.5,-0.225 -0.5,-0.5 0,-0.275 0.224,-0.5 0.5,-0.5 h 19 c 0.276,0 0.5,0.225 0.5,0.5 0,0.275 -0.224,0.5 -0.5,0.5 z"></path></g></g></svg>
+          </button>
+        </div>
+
+        <!-- 10. Subscribe and save link -->
+        <a href="{{ subscribe_url }}" class="twc-subscribe-link" id="twc-subscribe-{{ section.id }}">{{ subscribe_text }}</a>
+
+        <!-- 11. Bottom Meta Row (Suitable for & Pairs great with) -->
+        {%- if suitable_for_text != blank or pairs_with_text != blank -%}
+          <div class="twc-product__meta-footer">
+            {%- if suitable_for_text != blank -%}
+              <div class="twc-meta-col">
+                <span class="twc-meta-label">{{ section.settings.suitable_for_label | default: "Suitable for :" }}</span>
+                <span class="twc-meta-value">{{ suitable_for_text }}</span>
+              </div>
+            {%- endif -%}
+            {%- if pairs_with_text != blank -%}
+              <div class="twc-meta-col">
+                <span class="twc-meta-label">{{ section.settings.pairs_with_label | default: "Pairs great with a TWC:" }}</span>
+                <span class="twc-meta-value">{{ pairs_with_text }}</span>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        <!-- Status Message Box (Added to cart notification) -->
+        <div class="twc-cart-status" id="twc-status-{{ section.id }}" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Grind Guide Modal Popup -->
+  <div class="twc-modal-overlay" id="twc-guide-modal-{{ section.id }}" role="dialog" aria-modal="true" aria-labelledby="twc-guide-modal-title">
+    <div class="twc-modal-card">
+      <div class="twc-modal-header">
+        <h3 id="twc-guide-modal-title" class="twc-modal-title">BREWING &amp; GRIND SIZE GUIDE</h3>
+        <button type="button" class="twc-modal-close" id="twc-close-guide-{{ section.id }}" aria-label="Close guide modal">
+          &times;
+        </button>
+      </div>
+      <div class="twc-modal-body">
+        <div class="twc-guide-grid">
+          <div class="twc-guide-card">
+            <h4>Whole Beans</h4>
+            <span class="twc-guide-tag">Maximum Freshness</span>
+            <p>Best for coffee enthusiasts with a burr grinder at home. Grind freshly before brewing for peaked aromatics.</p>
+          </div>
+          <div class="twc-guide-card">
+            <h4>French Press</h4>
+            <span class="twc-guide-tag">Coarse Grind</span>
+            <p>Large distinct particles like sea salt. Allows optimal 4-minute steep extraction without passing through the mesh filter.</p>
+          </div>
+          <div class="twc-guide-card">
+            <h4>Aeropress</h4>
+            <span class="twc-guide-tag">Medium-Fine Grind</span>
+            <p>Slightly finer than table salt. Produces clean, rich, and full-bodied cups in under 2 minutes.</p>
+          </div>
+          <div class="twc-guide-card">
+            <h4>Pour Over (V60 / Kalita)</h4>
+            <span class="twc-guide-tag">Medium Grind</span>
+            <p>Consistency of rough sand. Perfect flow rate for clarity of flavor and nuanced floral notes.</p>
+          </div>
+          <div class="twc-guide-card">
+            <h4>Espresso</h4>
+            <span class="twc-guide-tag">Fine Grind</span>
+            <p>Powdered sugar texture. Resists 9 bars of pressure to create intense crema and velvety body.</p>
+          </div>
+          <div class="twc-guide-card">
+            <h4>Moka Pot</h4>
+            <span class="twc-guide-tag">Fine to Medium-Fine</span>
+            <p>Slightly coarser than espresso to prevent clogging steam valves while delivering bold stove-top coffee.</p>
+          </div>
+          <div class="twc-guide-card">
+            <h4>South Indian Filter</h4>
+            <span class="twc-guide-tag">Medium-Fine Grind</span>
+            <p>Tradition-tested grind that yields a thick, aromatic decoction when dripped through the brass filter.</p>
+          </div>
+          <div class="twc-guide-card">
+            <h4>Cold Brew</h4>
+            <span class="twc-guide-tag">Extra Coarse Grind</span>
+            <p>Chunky particles for a 16–24 hour cold water steep. Produces an ultra-smooth, low-acid brew.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400;1,700&display=swap');
+
+  /* ========================================================
+     1. BASE SECTION & CONTAINER
+     ======================================================== */
+  .twc-product-section {
+    background-color: var(--twc-p-bg, #EEE2E1);
+    color: var(--twc-p-navy, #2D3C4B);
+    font-family: 'Lato', sans-serif;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  .twc-product-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 40px 40px 80px;
+    box-sizing: border-box;
+    display: flex;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+    justify-content: space-between;
+  }
+
+  /* ========================================================
+     2. LEFT COLUMN: IMAGE CARD (+100px HEIGHT), ZOOM & ANIMATION
+     ======================================================== */
+  .twc-product__gallery-col {
+    position: sticky;
+    top: 120px;
+    width: 50%;
+  }
+
+  .twc-product__gallery-box {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background-color: var(--twc-p-card-bg, #cfadab);
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: crosshair;
+    user-select: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  }
+
+  .twc-gallery__track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .twc-gallery__slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 36px;
+    box-sizing: border-box;
+  }
+
+  .twc-gallery__slide.is-active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+    transform: translateX(0%);
+  }
+
+  .twc-gallery__img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+    transform-origin: center center;
+    transition: transform 0.15s ease-out;
+    pointer-events: none;
+  }
+
+  .twc-gallery__nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--twc-p-navy, #2D3C4B);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.2s ease;
+    padding: 0;
+  }
+
+  .twc-product__gallery-box:hover .twc-gallery__nav-arrow {
+    opacity: 0.85;
+  }
+
+  .twc-gallery__nav-arrow:hover {
+    opacity: 1 !important;
+    background: transparent;
+    transform: translateY(-50%) scale(1.15);
+  }
+
+  .twc-gallery__nav-arrow--prev {
+    left: 14px;
+  }
+
+  .twc-gallery__nav-arrow--next {
+    right: 14px;
+  }
+
+  .twc-gallery__nav-arrow svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .twc-gallery__dots {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    z-index: 20;
+  }
+
+  .twc-gallery__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #FFFFFF;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  }
+
+  .twc-gallery__dot.is-active {
+    background-color: var(--twc-p-navy, #2D3C4B);
+    transform: scale(1.1);
+  }
+
+  /* ========================================================
+     3. RIGHT COLUMN: PRODUCT DETAILS & FORM
+     ======================================================== */
+  .twc-product__info-col {
+    display: flex;
+    flex-direction: column;
+    padding-top: 4px;
+    box-sizing: border-box;
+    min-width: 0;
+    width: 40%;
+  }
+
+  /* Breadcrumbs */
+  .twc-breadcrumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+    color: #24394A;
+    margin-bottom: 0px;
+  }
+
+  .twc-breadcrumb__item {
+    color: #24394A;
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: #24394A;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: opacity 0.2s ease;
+  }
+
+  .twc-breadcrumb__item:hover {
+    opacity: 0.7;
+  }
+
+  .twc-breadcrumb__item--current {
+    font-weight: 500;
+  }
+
+  .twc-breadcrumb__sep {
+    color: #24394A;
+    font-size: 11px;
+    font-weight: 400;
+    user-select: none;
+    margin: 0 4px;
+  }
+
+  /* Product Title: 25px and weight 800 */
+  .twc-product__title {
+    font-family: 'Lato', sans-serif;
+    font-size: 25px;
+    line-height: 1.25;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--twc-p-navy, #2D3C4B);
+    margin: 40px 0 20px 0;
+    letter-spacing: 0.02em;
+  }
+
+  /* Flavor Notes: #883434, 18px, weight 800 */
+  .twc-product__flavor-notes {
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #883434;
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+    text-transform: capitalize;
+  }
+
+  /* Description: Angsana New, 15px */
+  .twc-product__description {
+    font-family: "Angsana New", serif;
+    font-size: 15px;
+    line-height: 1.3;
+    color: #25394A;
+    max-width: 450px;
+    font-weight: 500;
+    margin-bottom: 22px;
+  }
+
+  .twc-product__description p {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+    font-weight: inherit;
+    margin: 0 0 8px 0;
+  }
+
+  .twc-product__description p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Roast Profile */
+  .twc-product__roast-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 13px;
+  }
+
+  .twc-roast-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .twc-roast-dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: transparent;
+    border: 1.5px solid #883434;
+    display: inline-block;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+
+  .twc-roast-dot.is-filled {
+    background-color: #883434;
+  }
+
+  .twc-roast-text {
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #883434;
+    line-height: 1.4;
+  }
+
+  /* ========================================================
+     4. FORM FIELDS & STEPPER
+     ======================================================== */
+  .twc-product-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .twc-field-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 290px;
+  }
+
+  .twc-field-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .twc-field-label {
+    font-family: 'Lato', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--twc-p-navy, #2D3C4B);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .twc-field-header .twc-field-label {
+    margin-bottom: 0;
+  }
+
+  .twc-guide-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+    font-style: italic;
+    color: #4A5560;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: opacity 0.2s ease;
+  }
+
+  .twc-guide-btn:hover {
+    color: var(--twc-p-navy, #2D3C4B);
+  }
+
+  .twc-select-container {
+    position: relative;
+    width: 100%;
+    max-width: 290px;
+  }
+
+  .twc-select {
+    width: 100%;
+    max-width: 290px;
+    height: 44px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: transparent;
+    border: 1px solid rgba(45, 60, 75, 0.25);
+    border-radius: 0px;
+    padding: 0 34px 0 14px;
+    font-family: "Angsana New", serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--twc-p-navy, #2D3C4B);
+    cursor: pointer;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+  }
+
+  .twc-select:focus {
+    border-color: var(--twc-p-navy, #2D3C4B);
+  }
+
+  .twc-select-caret {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--twc-p-navy, #2D3C4B);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    height: 8px;
+  }
+
+  .twc-dual-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+    width: 100%;
+    max-width: 290px;
+  }
+
+  .twc-field-col {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .twc-field-col .twc-select-container {
+    max-width: 100%;
+  }
+
+  .twc-stepper-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 44px;
+    background-color: var(--twc-p-select-bg, #EAE0DF);
+    border: 1px solid rgba(45, 60, 75, 0.25);
+    border-radius: 0px;
+    padding: 0 10px;
+    box-sizing: border-box;
+  }
+
+  .twc-stepper-btn {
+    background: transparent;
+    border: none;
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--twc-p-navy, #2D3C4B);
+    cursor: pointer;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+  }
+
+  .twc-stepper-btn:hover {
+    opacity: 0.6;
+  }
+
+  .twc-stepper-val {
+    font-family: 'Lato', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--twc-p-navy, #2D3C4B);
+    letter-spacing: 0.05em;
+    user-select: none;
+  }
+
+  /* Price & Delivery */
+  .twc-price-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 24px;
+    width: 100%;
+    max-width: 290px;
+  }
+
+  .twc-price-line {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .twc-main-price {
+    font-family: 'Lato', sans-serif;
+    font-size: 25px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--twc-p-navy, #2D3C4B);
+  }
+
+  .twc-delivery-note {
+    font-family: 'Lato', sans-serif;
+    font-size: 12.5px;
+    font-style: italic;
+    color: var(--twc-p-navy, #2D3C4B);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  /* Action Buttons Row: container width 400px */
+  .twc-buttons-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 16px;
+  }
+
+  .twc-action-btn {
+    height: 40px;
+    background-color: var(--twc-p-btn-bg, #2D3C4B);
+    color: var(--twc-p-bg, #EEE2E1);
+    border: none;
+    border-radius: 0px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: background-color 0.25s ease, transform 0.15s ease;
+    box-sizing: border-box;
+    padding: 0 15px;
+  }
+
+  .twc-action-btn:hover {
+    background-color: #1e2832;
+  }
+
+  .twc-action-btn:active {
+    transform: scale(0.985);
+  }
+
+  .twc-action-btn__arrow {
+    width: 21px;
+    height: 21px;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .twc-action-btn__arrow path {
+    fill: var(--twc-p-bg, #EEE2E1);
+  }
+
+  .twc-action-btn:hover .twc-action-btn__arrow {
+    transform: translateX(4px);
+  }
+
+  .twc-action-btn--cart.is-loading,
+  .twc-action-btn--buynow.is-loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  /* Subscribe and save link */
+  .twc-subscribe-link {
+    display: inline-block;
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--twc-p-navy, #8D8F96);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: opacity 0.2s;
+    cursor: pointer;
+    width: fit-content;
+  }
+
+  .twc-subscribe-link:hover {
+    opacity: 0.7;
+  }
+
+  /* 2-Column Meta Footer */
+  .twc-product__meta-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 50px;
+    padding-top: 0;
+    border-top: none;
+    width: 100%;
+    max-width: 450px;
+  }
+
+  .twc-meta-col {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .twc-meta-label {
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--twc-p-navy, #2D3C4B);
+  }
+
+  .twc-meta-value {
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--twc-p-text-muted, #4A5560);
+    line-height: 1.4;
+  }
+
+  .twc-cart-status {
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    padding: 10px 14px;
+    display: none;
+    text-align: center;
+  }
+
+  /* ========================================================
+     5. BREWING & GRIND SIZE GUIDE MODAL
+     ======================================================== */
+  .twc-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(35, 51, 66, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .twc-modal-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .twc-modal-card {
+    background-color: #ffffff;
+    border-radius: 6px;
+    max-width: 680px;
+    width: 100%;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .twc-modal-overlay.is-open .twc-modal-card {
+    transform: translateY(0);
+  }
+
+  .twc-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #eee;
+    background-color: #faf7f5;
+  }
+
+  .twc-modal-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--twc-p-navy, #2D3C4B);
+  }
+
+  .twc-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 26px;
+    line-height: 1;
+    color: var(--twc-p-navy, #2D3C4B);
+    cursor: pointer;
+    padding: 0 4px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  .twc-modal-close:hover {
+    opacity: 1;
+  }
+
+  .twc-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  .twc-guide-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .twc-guide-card {
+    background-color: #fbf9f6;
+    border: 1px solid #ebdcd3;
+    border-radius: 4px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .twc-guide-card h4 {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--twc-p-navy, #2D3C4B);
+  }
+
+  .twc-guide-tag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--twc-p-mauve, #8E6E73);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .twc-guide-card p {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: #4a5560;
+  }
+
+  /* ========================================================
+     6. RESPONSIVE BREAKPOINTS (PROPORTIONALLY SCALED FONTS)
+     ======================================================== */
+  @media only screen and (min-width: 1025px) and (max-width: 1280px) {
+    .twc-product-container {
+      gap: 80px;
+      padding: 40px 30px 60px;
+    }
+    .twc-product__title {
+      font-size: 24px;
+    }
+  }
+
+  /* Tablet (769px - 1024px) */
+  @media only screen and (min-width: 769px) and (max-width: 1024px) {
+    .twc-product-container {
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 30px 20px 60px;
+      gap: 20px;
+    }
+    .twc-product__gallery-col {
+      position: sticky;
+      width: 50%;
+      max-width: 50%;
+      top: 90px;
+    }
+    .twc-product__info-col {
+      width: 45%;
+      max-width: 45%;
+    }
+    .twc-product__gallery-box {
+      min-height: 380px;
+    }
+    .twc-breadcrumbs,
+    .twc-breadcrumb__item {
+      font-size: 11px;
+    }
+    .twc-product__title {
+      font-size: 22px;
+      margin: 30px 0 16px 0;
+    }
+    .twc-product__flavor-notes {
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+    .twc-product__description {
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+    .twc-roast-text {
+      font-size: 12px;
+    }
+    .twc-field-label {
+      font-size: 10.5px;
+    }
+    .twc-guide-btn {
+      font-size: 11px;
+    }
+    .twc-select {
+      font-size: 12.5px;
+    }
+    .twc-stepper-btn {
+      font-size: 16px;
+    }
+    .twc-stepper-val {
+      font-size: 12.5px;
+    }
+    .twc-main-price {
+      font-size: 22px;
+    }
+    .twc-delivery-note {
+      font-size: 11.5px;
+    }
+    .twc-action-btn {
+      font-size: 11.5px;
+    }
+    .twc-subscribe-link {
+      font-size: 14px;
+      margin: 14px 0 24px 0;
+    }
+    .twc-meta-label,
+    .twc-meta-value {
+      font-size: 14px;
+    }
+  }
+
+  /* Mobile Landscape / Small Tablet (<= 768px) */
+  @media only screen and (max-width: 768px) {
+    .twc-product-container {
+      flex-direction: column;
+      gap: 40px;
+      padding: 24px 20px 60px;
+    }
+    .twc-product__gallery-col {
+      position: static;
+      width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    .twc-product__info-col {
+      width: 100%;
+      max-width: 100%;
+    }
+    .twc-product__gallery-box {
+      min-height: 420px;
+    }
+    .twc-breadcrumbs,
+    .twc-breadcrumb__item {
+      font-size: 10.5px;
+    }
+    .twc-product__title {
+      font-size: 20px;
+      margin: 24px 0 14px 0;
+    }
+    .twc-product__flavor-notes {
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+    .twc-product__description {
+      font-size: 13.5px;
+      margin-bottom: 16px;
+      max-width: 100%;
+    }
+    .twc-roast-text {
+      font-size: 11.5px;
+    }
+    .twc-roast-dot {
+      width: 13px;
+      height: 13px;
+    }
+    .twc-product-form {
+      max-width: 100%;
+      width: 100%;
+    }
+    .twc-field-group {
+      max-width: 100%;
+      width: 100%;
+    }
+    .twc-select-container,
+    .twc-select {
+      max-width: 100%;
+      width: 100%;
+    }
+    .twc-dual-fields {
+      max-width: 100%;
+      width: 100%;
+    }
+    .twc-field-label {
+      font-size: 10px;
+    }
+    .twc-guide-btn {
+      font-size: 11px;
+    }
+    .twc-select {
+      font-size: 12px;
+      height: 42px;
+    }
+    .twc-stepper-container {
+      height: 42px;
+      width: 100%;
+    }
+    .twc-stepper-btn {
+      font-size: 16px;
+    }
+    .twc-stepper-val {
+      font-size: 12px;
+    }
+    .twc-price-wrapper {
+      max-width: 100%;
+      width: 100%;
+    }
+    .twc-main-price {
+      font-size: 21px;
+    }
+    .twc-delivery-note {
+      font-size: 11px;
+    }
+    .twc-buttons-row {
+      max-width: 100%;
+      width: 100%;
+    }
+    .twc-action-btn {
+      font-size: 11px;
+      height: 46px;
+    }
+    .twc-subscribe-link {
+      font-size: 13.5px;
+      margin: 12px 0 20px 0;
+    }
+    .twc-product__meta-footer {
+      max-width: 100%;
+      width: 100%;
+      margin-top: 20px;
+      padding-top: 0;
+      border-top: none;
+    }
+    .twc-meta-label,
+    .twc-meta-value {
+      font-size: 13.5px;
+    }
+    .twc-guide-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Mobile Portrait (<= 480px) */
+  @media only screen and (max-width: 480px) {
+    .twc-product-container {
+      padding: 20px 16px 50px;
+      gap: 28px;
+    }
+    .twc-product__gallery-box {
+      min-height: 360px;
+    }
+    .twc-breadcrumbs,
+    .twc-breadcrumb__item {
+      font-size: 10px;
+    }
+    .twc-product__title {
+      font-size: 18px;
+      margin: 20px 0 12px 0;
+    }
+    .twc-product__flavor-notes {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .twc-product__description {
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+    .twc-roast-text {
+      font-size: 11px;
+    }
+    .twc-roast-dot {
+      width: 12px;
+      height: 12px;
+    }
+    .twc-field-label {
+      font-size: 9.5px;
+    }
+    .twc-guide-btn {
+      font-size: 10.5px;
+    }
+    .twc-select {
+      font-size: 11.5px;
+      height: 40px;
+    }
+    .twc-stepper-container {
+      height: 40px;
+    }
+    .twc-stepper-val {
+      font-size: 11.5px;
+    }
+    .twc-stepper-btn {
+      font-size: 15px;
+    }
+    .twc-dual-fields {
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .twc-main-price {
+      font-size: 19px;
+    }
+    .twc-delivery-note {
+      font-size: 10.5px;
+    }
+    .twc-buttons-row {
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      max-width: 100%;
+    }
+    .twc-action-btn {
+      font-size: 10px;
+      gap: 6px;
+      padding: 0 8px;
+      height: 44px;
+    }
+    .twc-action-btn__arrow {
+      width: 17px;
+      height: 17px;
+    }
+    .twc-subscribe-link {
+      font-size: 12.5px;
+      margin: 10px 0 18px 0;
+    }
+    .twc-product__meta-footer {
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 18px;
+      padding-top: 0;
+      border-top: none;
+      max-width: 100%;
+    }
+    .twc-meta-label,
+    .twc-meta-value {
+      font-size: 13px;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var sectionId = {{ section.id | json }};
+    var container = document.getElementById('twc-product-' + sectionId);
+    if (!container) return;
+
+    var galleryBox = container.querySelector('#twc-gallery-box-' + sectionId);
+    var slides = container.querySelectorAll('.twc-gallery__slide');
+    var dots = container.querySelectorAll('.twc-gallery__dot');
+    var prevBtn = container.querySelector('#twc-prev-' + sectionId);
+    var nextBtn = container.querySelector('#twc-next-' + sectionId);
+    var currentIndex = 0;
+    var totalSlides = slides.length;
+    var isTransitioning = false;
+
+    // Slide-in image transition with higher z-index (10)
+    function goToSlide(targetIndex, direction) {
+      if (totalSlides <= 1 || isTransitioning) return;
+      if (targetIndex === currentIndex) return;
+
+      if (targetIndex < 0) targetIndex = totalSlides - 1;
+      if (targetIndex >= totalSlides) targetIndex = 0;
+
+      isTransitioning = true;
+      var isNext = direction !== undefined ? direction === 'next' : targetIndex > currentIndex;
+      if (currentIndex === totalSlides - 1 && targetIndex === 0) isNext = true;
+      if (currentIndex === 0 && targetIndex === totalSlides - 1) isNext = false;
+
+      var currentSlide = slides[currentIndex];
+      var nextSlide = slides[targetIndex];
+
+      nextSlide.style.transition = 'none';
+      nextSlide.style.zIndex = '10';
+      nextSlide.style.opacity = '1';
+      nextSlide.style.visibility = 'visible';
+      nextSlide.style.transform = isNext ? 'translateX(100%)' : 'translateX(-100%)';
+      currentSlide.style.zIndex = '2';
+
+      nextSlide.offsetHeight;
+
+      nextSlide.style.transition = 'transform 0.48s cubic-bezier(0.25, 1, 0.5, 1)';
+      nextSlide.style.transform = 'translateX(0%)';
+
+      dots.forEach(function (dot, idx) {
+        if (idx === targetIndex) {
+          dot.classList.add('is-active');
+        } else {
+          dot.classList.remove('is-active');
+        }
+      });
+
+      setTimeout(function () {
+        currentSlide.classList.remove('is-active');
+        currentSlide.style.opacity = '0';
+        currentSlide.style.visibility = 'hidden';
+        currentSlide.style.zIndex = '1';
+        currentSlide.style.transform = 'translateX(0%)';
+        currentSlide.style.transition = '';
+
+        nextSlide.classList.add('is-active');
+        nextSlide.style.zIndex = '2';
+        nextSlide.style.transition = '';
+
+        currentIndex = targetIndex;
+        isTransitioning = false;
+      }, 500);
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        goToSlide(currentIndex - 1, 'prev');
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        goToSlide(currentIndex + 1, 'next');
+      });
+    }
+
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () {
+        var idx = parseInt(this.getAttribute('data-index'), 10);
+        if (!isNaN(idx)) goToSlide(idx);
+      });
+    });
+
+    // Touch Swipe Gesture for Carousel
+    if (galleryBox) {
+      var touchStartX = 0;
+      var touchEndX = 0;
+      galleryBox.addEventListener('touchstart', function (e) {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+      galleryBox.addEventListener('touchend', function (e) {
+        touchEndX = e.changedTouches[0].screenX;
+        var diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 40) {
+          if (diff > 0) goToSlide(currentIndex + 1, 'next');
+          else goToSlide(currentIndex - 1, 'prev');
+        }
+      }, { passive: true });
+
+      // Image Zoom on Hover with Cursor Tracking
+      var isHovering = false;
+      galleryBox.addEventListener('mouseenter', function () {
+        if (window.matchMedia('(hover: hover)').matches) {
+          isHovering = true;
+          var activeImg = galleryBox.querySelector('.twc-gallery__slide.is-active .twc-gallery__img');
+          if (activeImg) {
+            activeImg.style.transition = 'transform 0.15s ease-out';
+            activeImg.style.transform = 'scale(2.2)';
+          }
+        }
+      });
+
+      galleryBox.addEventListener('mousemove', function (e) {
+        if (!isHovering) return;
+        var activeImg = galleryBox.querySelector('.twc-gallery__slide.is-active .twc-gallery__img');
+        if (!activeImg) return;
+
+        var rect = galleryBox.getBoundingClientRect();
+        var x = ((e.clientX - rect.left) / rect.width) * 100;
+        var y = ((e.clientY - rect.top) / rect.height) * 100;
+        x = Math.max(0, Math.min(100, x));
+        y = Math.max(0, Math.min(100, y));
+
+        activeImg.style.transformOrigin = x + '% ' + y + '%';
+      });
+
+      galleryBox.addEventListener('mouseleave', function () {
+        isHovering = false;
+        var activeImg = galleryBox.querySelector('.twc-gallery__slide.is-active .twc-gallery__img');
+        if (activeImg) {
+          activeImg.style.transition = 'transform 0.3s ease-out, transform-origin 0.3s ease-out';
+          activeImg.style.transform = 'scale(1)';
+          setTimeout(function () {
+            if (!isHovering && activeImg) {
+              activeImg.style.transformOrigin = 'center center';
+            }
+          }, 300);
+        }
+      });
+    }
+
+    // Dynamic Price Updates on Size or Quantity Change
+    var sizeSelect = container.querySelector('#twc-size-select-' + sectionId);
+    var qtyInput = container.querySelector('#twc-qty-input-' + sectionId);
+    var qtyDisplay = container.querySelector('#twc-qty-display-' + sectionId);
+    var qtyMinusBtn = container.querySelector('#twc-qty-minus-' + sectionId);
+    var qtyPlusBtn = container.querySelector('#twc-qty-plus-' + sectionId);
+    var priceDisplayEl = container.querySelector('#twc-main-price-' + sectionId);
+
+    function updatePrice() {
+      if (!priceDisplayEl) return;
+      var selectedOpt = sizeSelect ? sizeSelect.options[sizeSelect.selectedIndex] : null;
+      var qty = qtyInput ? (parseInt(qtyInput.value, 10) || 1) : 1;
+
+      var rawPrice = selectedOpt ? selectedOpt.getAttribute('data-raw-price') : null;
+      var priceStr = selectedOpt ? selectedOpt.getAttribute('data-price') : '';
+      var currencySym = priceDisplayEl.getAttribute('data-currency-symbol') || 'Rs. ';
+
+      if (rawPrice && !isNaN(parseFloat(rawPrice))) {
+        var totalAmount = (parseFloat(rawPrice) / 100) * qty;
+        priceDisplayEl.textContent = currencySym + totalAmount.toLocaleString('en-IN');
+      } else if (priceStr) {
+        var match = priceStr.match(/[\d,]+/);
+        if (match) {
+          var num = parseFloat(match[0].replace(/,/g, ''));
+          var total = num * qty;
+          priceDisplayEl.textContent = currencySym + total.toLocaleString('en-IN');
+        } else {
+          priceDisplayEl.textContent = priceStr;
+        }
+      }
+    }
+
+    // Quantity Stepper Logic (- 01 +)
+    if (qtyMinusBtn && qtyInput && qtyDisplay) {
+      qtyMinusBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var currentVal = parseInt(qtyInput.value, 10) || 1;
+        var newVal = Math.max(1, currentVal - 1);
+        qtyInput.value = newVal;
+        qtyDisplay.textContent = newVal < 10 ? '0' + newVal : '' + newVal;
+        updatePrice();
+      });
+    }
+
+    if (qtyPlusBtn && qtyInput && qtyDisplay) {
+      qtyPlusBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var currentVal = parseInt(qtyInput.value, 10) || 1;
+        var newVal = currentVal + 1;
+        qtyInput.value = newVal;
+        qtyDisplay.textContent = newVal < 10 ? '0' + newVal : '' + newVal;
+        updatePrice();
+      });
+    }
+
+    // Variant Size Change Logic
+    if (sizeSelect) {
+      sizeSelect.addEventListener('change', function () {
+        var selectedOpt = sizeSelect.options[sizeSelect.selectedIndex];
+        if (!selectedOpt) return;
+
+        updatePrice();
+
+        // Check variant availability
+        var isAvailable = selectedOpt.getAttribute('data-available') !== 'false' && !selectedOpt.disabled;
+        var cartBtn = container.querySelector('#twc-add-btn-' + sectionId);
+        var buyNowBtn = container.querySelector('#twc-buynow-btn-' + sectionId);
+        if (cartBtn) {
+          var btnText = cartBtn.querySelector('.twc-action-btn__text');
+          if (btnText) btnText.textContent = isAvailable ? 'ADD TO CART' : 'SOLD OUT';
+          cartBtn.disabled = !isAvailable;
+          cartBtn.style.opacity = isAvailable ? '1' : '0.5';
+          cartBtn.style.cursor = isAvailable ? 'pointer' : 'not-allowed';
+        }
+        if (buyNowBtn) {
+          buyNowBtn.disabled = !isAvailable;
+          buyNowBtn.style.display = isAvailable ? 'flex' : 'none';
+        }
+
+        // Switch slide if variant has associated media
+        var mediaId = selectedOpt.getAttribute('data-media-id');
+        if (mediaId) {
+          for (var s = 0; s < slides.length; s++) {
+            if (slides[s].getAttribute('data-media-id') === mediaId) {
+              goToSlide(s);
+              break;
+            }
+          }
+        }
+      });
+    }
+
+    // Grind Guide Modal Logic
+    var guideModal = container.querySelector('#twc-guide-modal-' + sectionId);
+    var openGuideBtn = container.querySelector('#twc-open-guide-' + sectionId);
+    var closeGuideBtn = container.querySelector('#twc-close-guide-' + sectionId);
+
+    function toggleGuide(open) {
+      if (!guideModal) return;
+      if (open) {
+        guideModal.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      } else {
+        guideModal.classList.remove('is-open');
+        document.body.style.overflow = '';
+      }
+    }
+
+    if (openGuideBtn) {
+      openGuideBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        toggleGuide(true);
+      });
+    }
+
+    if (closeGuideBtn) {
+      closeGuideBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        toggleGuide(false);
+      });
+    }
+
+    if (guideModal) {
+      guideModal.addEventListener('click', function (e) {
+        if (e.target === guideModal) toggleGuide(false);
+      });
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && guideModal && guideModal.classList.contains('is-open')) {
+        toggleGuide(false);
+      }
+    });
+
+    // Cart Drawer / Cart AJAX Integration
+    var form = container.querySelector('#twc-product-form-' + sectionId);
+    var cartBtn = container.querySelector('#twc-add-btn-' + sectionId);
+    var buyNowBtn = container.querySelector('#twc-buynow-btn-' + sectionId);
+    var statusEl = container.querySelector('#twc-status-' + sectionId);
+
+    function showStatus(msg, isError) {
+      if (!statusEl) return;
+      statusEl.textContent = msg;
+      statusEl.style.display = 'block';
+      statusEl.style.backgroundColor = isError ? '#f8d7da' : '#d4edda';
+      statusEl.style.color = isError ? '#721c24' : '#155724';
+      statusEl.style.borderColor = isError ? '#f5c6cb' : '#c3e6cb';
+      setTimeout(function () {
+        statusEl.style.display = 'none';
+      }, 4000);
+    }
+
+    function triggerCartDrawer() {
+      var drawerTrigger = document.querySelector('.twc-cart-trigger');
+      if (drawerTrigger) {
+        drawerTrigger.click();
+      } else {
+        var cartDrawer = document.getElementById('cart-drawer');
+        if (cartDrawer) {
+          if (typeof cartDrawer.show === 'function') cartDrawer.show();
+          else cartDrawer.toggleAttribute('open');
+        }
+      }
+    }
+
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var formData = new FormData(form);
+        if (cartBtn) cartBtn.classList.add('is-loading');
+
+        fetch((window.Shopify?.routes?.root || '/') + 'cart/add.js', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+          .then(function (res) {
+            return res.json();
+          })
+          .then(function (data) {
+            if (cartBtn) cartBtn.classList.remove('is-loading');
+            if (data.status && data.status >= 400) {
+              showStatus(data.description || 'Could not add to cart.', true);
+            } else {
+              showStatus('Added to cart successfully!', false);
+              document.dispatchEvent(new CustomEvent('cart:updated', { bubbles: true }));
+              document.dispatchEvent(new CustomEvent('shopify:cart:lines-update', { bubbles: true }));
+              triggerCartDrawer();
+            }
+          })
+          .catch(function () {
+            if (cartBtn) cartBtn.classList.remove('is-loading');
+            showStatus('Added to cart!', false);
+            triggerCartDrawer();
+          });
+      });
+    }
+
+    // Buy Now Direct Checkout Logic
+    if (buyNowBtn && form) {
+      buyNowBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var formData = new FormData(form);
+        buyNowBtn.classList.add('is-loading');
+
+        fetch((window.Shopify?.routes?.root || '/') + 'cart/add.js', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+          .then(function () {
+            window.location.href = (window.Shopify?.routes?.root || '/') + 'checkout';
+          })
+          .catch(function () {
+            window.location.href = (window.Shopify?.routes?.root || '/') + 'checkout';
+          });
+      });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "TWC Product Details",
+  "tag": "section",
+  "class": "section-twc-product-details",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Theme Preview Fallbacks",
+      "info": "Values below are only used when previewing in the theme customizer without a product selected."
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Fallback Product Title"
+    },
+    {
+      "type": "text",
+      "id": "flavor_notes",
+      "label": "Fallback Subtitle / Flavor Notes"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Fallback Description"
+    },
+    {
+      "type": "text",
+      "id": "price",
+      "label": "Fallback Price"
+    },
+    {
+      "type": "text",
+      "id": "free_delivery_text",
+      "label": "Free Delivery Notice"
+    },
+    {
+      "type": "header",
+      "content": "Additional Product Information"
+    },
+    {
+      "type": "text",
+      "id": "suitable_for_label",
+      "label": "Suitable For Label",
+      "default": "Suitable for :"
+    },
+    {
+      "type": "text",
+      "id": "default_suitable_for",
+      "label": "Default Suitable For"
+    },
+    {
+      "type": "text",
+      "id": "pairs_with_label",
+      "label": "Pairs With Label",
+      "default": "Pairs great with a TWC:"
+    },
+    {
+      "type": "text",
+      "id": "default_pairs_with",
+      "label": "Default Pairs With"
+    },
+    {
+      "type": "text",
+      "id": "subscribe_text",
+      "label": "Subscribe Text",
+      "default": "Subscribe and save!"
+    },
+    {
+      "type": "url",
+      "id": "subscribe_url",
+      "label": "Subscribe Link URL"
+    },
+    {
+      "type": "header",
+      "content": "Color Palette"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section Background",
+      "default": "#EEE2E1"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Image Card Background",
+      "default": "#cfadab"
+    },
+    {
+      "type": "color",
+      "id": "navy_color",
+      "label": "Primary Dark Color",
+      "default": "#2D3C4B"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg",
+      "label": "Button Background Color",
+      "default": "#2D3C4B"
+    },
+    {
+      "type": "color",
+      "id": "mauve_color",
+      "label": "Flavor Notes / Roast Accent Color",
+      "default": "#883434"
+    },
+    {
+      "type": "color",
+      "id": "select_bg",
+      "label": "Select & Stepper Background",
+      "default": "#EAE0DF"
+    }
+  ],
+  "presets": [
+    {
+      "name": "TWC Product Details"
+    }
+  ]
+}
+{% endschema %}
