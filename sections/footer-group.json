@@ -1,5 +1,12 @@
-
-
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "type": "footer",
   "name": "Footer",
@@ -10,8 +17,28 @@
         "newsletter_title": "DON'T BE A STRANGER.",
         "newsletter_placeholder": "Your email id",
         "newsletter_btn": "SIGN UP",
-        "bg_color": "#2D3C4B",
-        "text_color": "#d7d1c9"
+        "cafes_title": "CAFES",
+        "menu_cafes": "cafes",
+        "policies_title": "POLICIES",
+        "menu_policies": "policies",
+        "company_title": "COMPANY",
+        "menu_company": "company",
+        "contact_title": "CONTACT",
+        "contact_address": "2nd Floor, 2082 24th Main Rd Vanganahalli 1st Sector, HSR Layout, Bengaluru 560102",
+        "contact_phone": "080 12345 67890",
+        "contact_email": "care@thirdwavecoffee.in",
+        "copyright_text": "Copyright 2026 Third Wave Coffee",
+        "app_text": "DOWNLOAD THE TWC CAFE APP",
+        "app_text_mobile": "DOWNLOAD OUR APP",
+        "app_link": "",
+        "instagram": "https://www.instagram.com/thirdwavecoffeeindia/",
+        "facebook": "https://www.facebook.com/thirdwavecoffeeindia",
+        "youtube": "https://youtube.com",
+        "spotify": "https://open.spotify.com/playlist/1SJnLIFmgg0R83wLluQ6Ou?si=a46c722ed6124009",
+        "bg_color": "#2d3c4b",
+        "accent_color": "#d7d1c9",
+        "text_color": "#d7d1c9",
+        "border_color": "#d7d1c959"
       }
     }
   },
