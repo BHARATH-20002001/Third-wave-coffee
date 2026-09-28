@@ -145,7 +145,7 @@
       "type": "twc-accurity-section",
       "settings": {
         "heading": "100% ARABICA COFFEE, SOURCED RESPONSIBLY, ROASTED CAREFULLY.",
-        "content": "Our coffee is 100% Arabica and contains no preservatives or additives. We directly source it from farms, working closely with growers to make sure that your coffee is of the highest quality, grown sustainably and traded ethically. Our selections are specially roasted in our in-house, state-of-the-art roaster with specific profiles to ensure optimal flavour notes. True to our namesake, we pay close attention to every link in the supply chain and every detail of the coffee experience.",
+        "content": "Our coffee is 100% Arabica and contains no preservatives or additives. We directly source it from farms, working closely with growers to make sure that your coffee is of the highest quality, grown sustainably and traded ethically. Our selections are specially roasted in our in-house, state-of-the-art roaster with specific profiles to ensure optimal flavour notes. True to our namesake, we pay close attention to every link in the supply chain and every detail of the coffee experience",
         "illustration_image": "shopify://shop_images/ProductCollection_100percentArabica.svg",
         "photo_image": "shopify://shop_images/shop-page-img.webp",
         "bg_color": "#d7d1c9",
@@ -159,17 +159,20 @@
       "settings": {
         "heading": "YOU MAY ALSO LIKE",
         "heading_color": "#24394a",
-        "bg_color": "#FBFAF9",
+        "bg_color": "#fbfaf9",
+        "use_exact_mockup_cards": false,
+        "product_list": [],
+        "collection": "",
         "products_to_show": 4,
         "columns_desktop": 4,
         "columns_mobile": "2",
         "image_fit": "cover",
         "default_roast_label": "Roast Level",
         "default_flavor_notes": "Dark Chocolate Macadamia Nuts, Brown Sugar, Mandarin, Roasted Almond Pistachio",
-        "btn_bg_color": "#D7D1C9",
-        "btn_text_color": "#2D3C4B",
+        "btn_bg_color": "#d7d1c9",
+        "btn_text_color": "#2d3c4b",
         "btn_hover_bg_color": "#c5beb6",
-        "btn_hover_text_color": "#2D3C4B",
+        "btn_hover_text_color": "#2d3c4b",
         "padding_top": 48,
         "padding_bottom": 64
       }
