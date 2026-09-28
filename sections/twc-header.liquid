@@ -220,10 +220,11 @@
       </div>
     </div>
   </div>
+</header>
 
-  <!-- Mobile Slide-In Drawer from Left (bg #2D3C4B, white font) -->
-  <div class="twc-drawer-overlay" id="twc-drawer-overlay"></div>
-  <div class="twc-mobile-drawer" id="twc-mobile-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
+<!-- Mobile Slide-In Drawer from Left (bg #2D3C4B, white font) -->
+<div class="twc-drawer-overlay" id="twc-drawer-overlay"></div>
+<div class="twc-mobile-drawer" id="twc-mobile-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
     <div class="twc-drawer-header">
       <button type="button" class="twc-drawer-close" id="twc-drawer-close" aria-label="Close menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -319,7 +320,6 @@
       </ul>
     </nav>
   </div>
-</header>
 <div id="twc-header-placeholder" class="twc-header-placeholder" style="display: none;" aria-hidden="true"></div>
 
 <style>
@@ -334,6 +334,7 @@
     padding-top: var(--twc-header-padding-top, 0px);
     padding-bottom: var(--twc-header-padding-bottom, 0px);
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    overflow: visible !important;
   }
   .twc-header-wrapper.twc-header-sticky {
     position: fixed !important;
@@ -342,12 +343,14 @@
     right: 0;
     width: 100%;
     z-index: 999;
+    overflow: visible !important;
   }
   .twc-header-wrapper.twc-header-scrolled {
     background-color: #ffffff !important;
     --twc-header-bg: #ffffff !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    animation: twcHeaderSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: twcHeaderSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: visible !important;
   }
   .twc-header-placeholder {
     width: 100%;
@@ -591,38 +594,48 @@
 
   /* Mobile Slide-in Drawer (Matching shared image: bg #2D3C4B, white font) */
   .twc-drawer-overlay {
-    position: fixed;
-    inset: 0;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
     background: rgba(0, 0, 0, 0.45);
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
-    z-index: 1000;
+    z-index: 100000 !important;
+    pointer-events: none;
   }
   .twc-drawer-overlay.is-open {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
   }
   .twc-mobile-drawer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    height: 100dvh !important;
     width: 78%;
     max-width: 330px;
     background-color: #2D3C4B;
     color: #FFFFFF;
-    z-index: 1001;
+    z-index: 100001 !important;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
     box-shadow: 4px 0 25px rgba(0,0,0,0.25);
-    overflow-y: auto;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
+    overscroll-behavior: contain;
   }
   .twc-mobile-drawer.is-open {
     transform: translateX(0);
+    visibility: visible !important;
   }
   .twc-drawer-header {
     display: flex;
@@ -893,12 +906,25 @@
     // 2. Mobile Slide-In Drawer Logic
     var drawer = document.getElementById('twc-mobile-drawer');
     var overlay = document.getElementById('twc-drawer-overlay');
+
+    // Attach drawer and overlay to document.body so sticky header stacking context / overflow cannot clip the drawer
+    if (drawer && overlay && drawer.parentElement !== document.body) {
+      document.body.appendChild(overlay);
+      document.body.appendChild(drawer);
+    }
+
     function toggleDrawer(open){
       if(!drawer || !overlay) return;
       var state = open !== undefined ? open : !drawer.classList.contains('is-open');
       drawer.classList.toggle('is-open', state);
       overlay.classList.toggle('is-open', state);
-      document.body.style.overflow = state ? 'hidden' : '';
+      if (state) {
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+      }
     }
     document.getElementById('twc-drawer-open')?.addEventListener('click', function(){ toggleDrawer(true); });
     document.getElementById('twc-drawer-close')?.addEventListener('click', function(){ toggleDrawer(false); });
@@ -947,8 +973,15 @@
       var isScrolled = false;
       var ticking = false;
 
+      function getScrollTop() {
+        var pw = document.querySelector('.page-wrapper');
+        var pwScroll = pw ? pw.scrollTop : 0;
+        var winScroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        return Math.max(0, pwScroll, winScroll);
+      }
+
       function handleHeaderScroll() {
-        var scrollY = Math.max(0, window.pageYOffset || document.documentElement.scrollTop || 0);
+        var scrollY = getScrollTop();
 
         if (scrollY > 200) {
           if (!isFixed) {
@@ -969,7 +1002,7 @@
             header.classList.remove('twc-header-scrolled');
             isScrolled = false;
           }
-          if (scrollY <= 0 && isFixed) {
+          if (scrollY <= 5 && isFixed) {
             header.classList.remove('twc-header-sticky');
             if (placeholder) {
               placeholder.style.display = 'none';
@@ -988,8 +1021,25 @@
         }
       }
 
+      // Listen on window (mobile) and document capture (desktop & all scroll containers)
       window.addEventListener('scroll', onScroll, { passive: true });
+      document.addEventListener('scroll', onScroll, { capture: true, passive: true });
+
+      function bindScrollContainer() {
+        var pw = document.querySelector('.page-wrapper');
+        if (pw) {
+          pw.removeEventListener('scroll', onScroll);
+          pw.addEventListener('scroll', onScroll, { passive: true });
+        }
+      }
+
+      bindScrollContainer();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindScrollContainer);
+      }
+
       window.addEventListener('resize', function() {
+        bindScrollContainer();
         if (isFixed && placeholder) {
           placeholder.style.height = header.offsetHeight + 'px';
         }
