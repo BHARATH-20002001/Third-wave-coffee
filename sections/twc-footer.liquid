@@ -1,21 +1,45 @@
 {%- doc -%}
-  Custom minimal Footer Section matching Third Wave Coffee Figma design.
+  Third Wave Coffee Custom Footer Section:
+  - Left column:
+    * "DON'T BE A STRANGER." header
+    * Newsletter signup (input + SIGN UP button) with Shopify customer form
+    * Steaming coffee cup SVG icon at bottom-left
+  - Right columns:
+    * 3 Navigation columns: CAFES, POLICIES, COMPANY
+    * Horizontal divider line below the 3 navigation columns
+    * Under the divider: Social links (Instagram, Facebook, YouTube, Spotify) + "DOWNLOAD THE TWC CAFE APP" link
+    * CONTACT column on the far right: Address, Phone, Email, and Copyright notice
+  - Fully responsive for desktop, tablet, and mobile
 {%- enddoc -%}
 
-<div class="twc-footer-wrapper" style="--twc-footer-bg: {{ section.settings.bg_color | default: '#2b3b47' }}; --twc-footer-text: {{ section.settings.text_color | default: '#d5dde4' }};">
-  <footer class="twc-footer">
-    <div class="twc-footer__top">
+<!-- Google Fonts Lato & Roboto -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+<div
+  class="twc-footer-wrapper"
+  style="
+    --twc-footer-bg: {{ section.settings.bg_color | default: '#2D3C4B' }};
+    --twc-footer-accent: {{ section.settings.accent_color | default: '#d7d1c9' }};
+    --twc-footer-text: {{ section.settings.text_color | default: '#d7d1c9' }};
+    --twc-footer-border: {{ section.settings.border_color | default: 'rgba(215, 209, 201, 0.35)' }};
+  "
+>
+  <footer class="twc-footer" id="footer">
+    <div class="twc-footer__inner">
       <!-- Left Column: Newsletter & Cup Icon -->
       <div class="twc-footer__left">
         <div class="twc-footer__newsletter">
           <h3 class="twc-footer__heading">{{ section.settings.newsletter_title | default: "DON'T BE A STRANGER." }}</h3>
-          {% form 'customer', class: 'twc-newsletter-form' %}
+          {% form 'customer', class: 'twc-newsletter-form', id: 'footer_contact_form' %}
             <input type="hidden" name="contact[tags]" value="newsletter">
             <div class="twc-newsletter-input-group">
               <input
                 type="email"
                 name="contact[email]"
                 class="twc-newsletter-input"
+                id="FooterNewsletterEmail"
                 value="{{ form.email }}"
                 placeholder="{{ section.settings.newsletter_placeholder | default: 'Your email id' }}"
                 autocorrect="off"
@@ -23,124 +47,187 @@
                 autocomplete="email"
                 required
               >
-              <button type="submit" class="twc-newsletter-btn" name="commit">
+              <button type="submit" class="twc-newsletter-btn" name="commit" id="FooterNewsletterSubmit">
                 {{ section.settings.newsletter_btn | default: 'SIGN UP' }}
               </button>
             </div>
             {%- if form.posted_successfully? -%}
-              <p class="twc-newsletter-success">Thanks for subscribing!</p>
+              <p class="twc-newsletter-success">Thank you for subscribing!</p>
+            {%- elsif form.errors -%}
+              <p class="twc-newsletter-error">{{ form.errors.translated_fields.email | capitalize }} {{ form.errors.messages.email }}</p>
             {%- endif -%}
           {% endform %}
         </div>
 
-        <div class="twc-footer__cup-icon">
-          <svg width="68" height="60" viewBox="0 0 100 80" fill="none" stroke="currentColor" stroke-width="2.2">
-            <!-- Steam -->
-            <path d="M46 12 Q43 20 47 28" stroke-linecap="round"/>
-            <path d="M53 10 Q50 18 54 26" stroke-linecap="round"/>
-            <!-- Cup rim & body -->
-            <path d="M26 34 Q50 31 74 34 L71 58 Q50 72 29 58 Z" />
-            <!-- Coffee line inside -->
-            <ellipse cx="50" cy="38" rx="20" ry="5" />
-            <!-- Handle -->
-            <path d="M72 38 Q86 42 86 49 Q86 56 69 56" />
-            <!-- Saucer -->
-            <ellipse cx="50" cy="65" rx="34" ry="9" />
+        <!-- Coffee Cup SVG Icon (bottom left) -->
+        <div class="twc-footer__cup-container">
+          <svg class="twc-cup-svg" viewBox="0 0 65 73" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path class="twc-cup-stroke" d="M36.1,26.9c8.6,0.7,15.2,4.7,15.2,9.5c0,5.3-8,9.6-17.9,9.6s-17.9-4.3-17.9-9.6s8-9.6,17.9-9.6"/>
+            <path class="twc-cup-fill" d="M50.4,39.3c-2.3,3.8-9.1,6.5-17,6.5s-14.6-2.7-17-6.5l0,0c2.4-3.8,9.1-6.5,17-6.5S48,35.4,50.4,39.3L50.4,39.3z"/>
+            <path class="twc-cup-stroke" d="M51.3,36.9c0,0.3,0,0.7,0,1c0,12.4-8,22.4-17.9,22.4s-17.9-10-17.9-22.4c0-0.5,0-0.7,0-1.2"/>
+            <path class="twc-cup-stroke" d="M15.6,41c-0.8-1.1-2.7-3.3-5.1-2.5c-3.5,1.2-3.8,5.8-2.9,8.5c1.5,4.6,6.3,7.8,11.2,4.2"/>
+            <path class="twc-cup-stroke" d="M15.6,42.9c-0.8-0.9-2.3-2.1-3.8-2c-2.6,0.3-2.6,3.8-2.1,5.5c0.9,2.8,3.9,4.3,6.6,3.3c0.3-0.1,0.7-0.3,1-0.4"/>
+            <path class="twc-cup-stroke" d="M9.8,46.1c2-1,4.1-1.8,6.3-2.5"/>
+            <path class="twc-cup-stroke" d="M50.6,44.2c7.8,2.7,12.9,7.1,12.9,12.1c0,8.2-13.9,14.9-31,14.9s-31-6.7-31-14.8c0-3.3,2.3-6.5,6.2-8.9"/>
+            <path class="twc-cup-stroke" d="M34.8,2.1c0.1-0.1-0.2-0.3-0.3-0.1C32.5,3.2,28,6.6,27.7,10c-0.3,4.1,4.5,8.9,5.9,12.6c1,2.7-0.7,6.5-1.9,8.7c-0.1,0.2,0.4,0.4,0.6,0.2c1.8-1.8,4.7-5,5.3-7.9c0.9-4.3-6.6-9.7-5.7-14.8C32.4,6.4,33.4,4.1,34.8,2.1z"/>
           </svg>
         </div>
       </div>
 
-      <!-- Right Column: Navigation Links & Address -->
-      <div class="twc-footer__cols">
-        <!-- Col 1: Cafes -->
-        <div class="twc-footer__col">
-          <h4 class="twc-col-title">CAFES</h4>
-          <ul class="twc-footer-links">
-            <li><a href="#">Bangalore</a></li>
-            <li><a href="#">Delhi</a></li>
-            <li><a href="#">Hyderabad</a></li>
-            <li><a href="#">Pune</a></li>
-          </ul>
-        </div>
+      <!-- Right Column: Navigation Group + Contact Column -->
+      <div class="twc-footer__right">
+        <!-- Main Navigation Sub-group (Col 1 to 3 + divider + socials) -->
+        <div class="twc-footer__nav-group">
+          <div class="twc-footer__nav-cols">
+            <!-- Col 1: CAFES (order 2 on mobile) -->
+            <div class="twc-footer__col twc-footer__col--cafes">
+              <h5 class="twc-col-title">{{ section.settings.cafes_title | default: 'CAFES' }}</h5>
+              <div class="twc-footer-links">
+                {%- if section.settings.menu_cafes != blank and linklists[section.settings.menu_cafes].links.size > 0 -%}
+                  {%- for link in linklists[section.settings.menu_cafes].links -%}
+                    <div><a href="{{ link.url }}">{{ link.title }}</a></div>
+                  {%- endfor -%}
+                {%- else -%}
+                  <div><a href="https://www.thirdwavecoffeeroasters.com/pages/cafes#bengaluru">Bangalore</a></div>
+                  <div><a href="https://www.thirdwavecoffeeroasters.com/pages/cafes#delhincr">Delhi</a></div>
+                  <div><a href="https://www.thirdwavecoffeeroasters.com/pages/cafes#hyderabad">Hyderabad</a></div>
+                  <div><a href="https://www.thirdwavecoffeeroasters.com/pages/cafes#pune">Pune</a></div>
+                {%- endif -%}
+              </div>
+            </div>
 
-        <!-- Col 2: Policies -->
-        <div class="twc-footer__col">
-          <h4 class="twc-col-title">POLICIES</h4>
-          <ul class="twc-footer-links">
-            <li><a href="/policies/terms-of-service">Terms & Conditions</a></li>
-            <li><a href="/policies/privacy-policy">Privacy Policy</a></li>
-            <li><a href="/policies/shipping-policy">Shipping</a></li>
-            <li><a href="/policies/refund-policy">Returns & Cancellation</a></li>
-          </ul>
-        </div>
+            <!-- Col 2: POLICIES (order 3 on mobile) -->
+            <div class="twc-footer__col twc-footer__col--policies">
+              <h5 class="twc-col-title">{{ section.settings.policies_title | default: 'POLICIES' }}</h5>
+              <div class="twc-footer-links">
+                {%- if section.settings.menu_policies != blank and linklists[section.settings.menu_policies].links.size > 0 -%}
+                  {%- for link in linklists[section.settings.menu_policies].links -%}
+                    <div><a href="{{ link.url }}">{{ link.title }}</a></div>
+                  {%- endfor -%}
+                {%- else -%}
+                  <div><a href="/pages/term-and-conditions">Terms & Conditions</a></div>
+                  <div><a href="/pages/privacy-policy">Privacy Policy</a></div>
+                  <div><a href="/pages/shipping">Shipping</a></div>
+                  <div><a href="/pages/shipping">Returns & Cancellation</a></div>
+                {%- endif -%}
+              </div>
+            </div>
 
-        <!-- Col 3: Company -->
-        <div class="twc-footer__col">
-          <h4 class="twc-col-title">COMPANY</h4>
-          <ul class="twc-footer-links">
-            <li><a href="#">Careers</a></li>
-            <li><a href="#">FAQ</a></li>
-            <li><a href="#">Newsroom</a></li>
-            <li><a href="#">Partner with us</a></li>
-          </ul>
-        </div>
+            <!-- Col 3: COMPANY (order 1 on mobile) -->
+            <div class="twc-footer__col twc-footer__col--company">
+              <h5 class="twc-col-title">{{ section.settings.company_title | default: 'COMPANY' }}</h5>
+              <div class="twc-footer-links">
+                {%- if section.settings.menu_company != blank and linklists[section.settings.menu_company].links.size > 0 -%}
+                  {%- for link in linklists[section.settings.menu_company].links -%}
+                    <div><a href="{{ link.url }}">{{ link.title }}</a></div>
+                  {%- endfor -%}
+                {%- else -%}
+                  <div><a href="/pages/career">Careers</a></div>
+                  <div><a href="/pages/faq">FAQ</a></div>
+                  <div><a href="/pages/newsroom">Newsroom</a></div>
+                  <div><a href="/pages/contact">Partner with us</a></div>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
 
-        <!-- Col 4: Contact -->
-        <div class="twc-footer__col twc-footer__col--contact">
-          <h4 class="twc-col-title">CONTACT</h4>
-          <div class="twc-contact-info">
-            <p>2nd Floor, 2082<br>24th Main Rd Vanganahalli<br>1st Sector, HSR Layout,<br>Bengaluru 560102</p>
-            <p class="twc-contact-phones">
-              <a href="tel:0801234567890">080 12345 67890</a><br>
-              <a href="mailto:care@thirdwavecoffee.in">care@thirdwavecoffee.in</a>
-            </p>
+          <!-- Divider line under the 3 columns (desktop only) -->
+          <div class="twc-footer__nav-divider twc-divider--desktop"></div>
+
+          <!-- Subnav bottom: Social icons + Download app (desktop only) -->
+          <div class="twc-footer__nav-bottom twc-nav-bottom--desktop">
+            <div class="twc-social-links">
+              <!-- Instagram -->
+              <a href="{{ section.settings.instagram | default: 'https://www.instagram.com/thirdwavecoffeeindia/' }}" target="_blank" rel="noopener" aria-label="Instagram">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+              </a>
+
+              <!-- Facebook -->
+              <a href="{{ section.settings.facebook | default: 'https://www.facebook.com/thirdwavecoffeeindia' }}" target="_blank" rel="noopener" aria-label="Facebook">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.77 7.46H14.5v-1.9c0-.9.6-1.1 1-1.1h3V.5h-4.33C10.24.5 9.5 3.44 9.5 5.32v2.15h-3v4h3v12h5v-12h3.85l.42-4z"/>
+                </svg>
+              </a>
+
+              <!-- YouTube -->
+              <a class="twc-social-link--youtube" href="{{ section.settings.youtube | default: 'https://youtube.com' }}" target="_blank" rel="noopener" aria-label="YouTube">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+              </a>
+
+              <!-- Spotify -->
+              <a href="{{ section.settings.spotify | default: 'https://open.spotify.com/playlist/1SJnLIFmgg0R83wLluQ6Ou?si=a46c722ed6124009' }}" target="_blank" rel="noopener" aria-label="Spotify">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.503 17.308c-.215.353-.675.466-1.028.25-2.82-1.722-6.37-2.112-10.55-1.157-.402.092-.803-.16-.895-.562-.092-.403.16-.803.562-.895 4.577-1.047 8.508-.605 11.66 1.336.353.216.466.675.251 1.028zm1.47-3.267c-.27.441-.847.58-1.288.31-3.228-1.984-8.148-2.557-11.966-1.398-.496.15-1.023-.13-1.173-.626-.15-.497.13-1.024.626-1.174 4.364-1.325 9.791-.684 13.49 1.599.442.271.581.848.311 1.289zm.129-3.402C15.234 8.358 8.868 8.147 5.163 9.272c-.604.184-1.246-.16-1.43-.764-.183-.604.161-1.246.764-1.43 4.257-1.293 11.298-1.049 15.753 1.596.544.323.722 1.028.4 1.572-.323.543-1.028.72-1.571.399z"/>
+                </svg>
+              </a>
+            </div>
+
+            <a class="twc-app-link twc-app-link--desktop" href="{{ section.settings.app_link | default: 'http://onelink.to/twcrindia' }}">
+              {{ section.settings.app_text | default: 'DOWNLOAD THE TWC CAFE APP' }}
+            </a>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Divider -->
-    <hr class="twc-footer__divider">
-
-    <!-- Bottom Bar: Socials, App Download, Copyright -->
-    <div class="twc-footer__bottom">
-      <div class="twc-footer__bottom-left">
-        <div class="twc-social-links">
-          <!-- Instagram -->
-          <a href="{{ section.settings.instagram | default: 'https://instagram.com' }}" target="_blank" rel="noopener" aria-label="Instagram">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-            </svg>
-          </a>
-          <!-- Facebook -->
-          <a href="{{ section.settings.facebook | default: 'https://facebook.com' }}" target="_blank" rel="noopener" aria-label="Facebook">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-            </svg>
-          </a>
-          <!-- YouTube -->
-          <a href="{{ section.settings.youtube | default: 'https://youtube.com' }}" target="_blank" rel="noopener" aria-label="YouTube">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43zM9.75 15.02V8.48l5.75 3.27-5.75 3.27z"/>
-            </svg>
-          </a>
-          <!-- Spotify -->
-          <a href="{{ section.settings.spotify | default: 'https://spotify.com' }}" target="_blank" rel="noopener" aria-label="Spotify">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.477 2 2 6.477 2 12c0 5.522 4.477 10 10 10s10-4.478 10-10c0-5.523-4.477-10-10-10zm4.586 14.424c-.18.295-.563.387-.857.208-2.35-1.435-5.308-1.76-8.792-.963-.334.077-.67-.13-.746-.465-.077-.334.13-.67.465-.747 3.808-.87 7.076-.496 9.722 1.11.294.18.386.563.208.857zm1.225-2.723c-.226.368-.71.485-1.078.26-2.69-1.654-6.79-2.133-9.97-1.167-.414.125-.85-.11-1.026-.523-.125-.413.11-.85.523-1.025 3.633-1.103 8.148-.568 11.29 1.367.368.226.485.71.26 1.078zm.105-2.835C14.692 8.95 9.375 8.775 6.297 9.71c-.495.15-1.02-.132-1.17-.627-.15-.494.132-1.02.627-1.17 3.535-1.073 9.404-.863 13.12 1.344.444.264.59.84.327 1.284-.264.443-.84.59-1.284.326z"/>
-            </svg>
-          </a>
+        <!-- Col 4: CONTACT -->
+        <div class="twc-footer__col twc-footer__col--contact">
+          <h5 class="twc-col-title">{{ section.settings.contact_title | default: 'CONTACT' }}</h5>
+          <div class="twc-contact-content">
+            <div class="twc-contact-address">
+              {{ section.settings.contact_address | default: '2nd Floor, 2082 24th Main Rd Vanganahalli 1st Sector, HSR Layout, Bengaluru 560102' | replace: '<br>', ' ' | replace: '<br/>', ' ' | replace: '<br />', ' ' }}
+            </div>
+            <div class="twc-contact-direct">
+              <div><a href="tel:{{ section.settings.contact_phone | default: '080 12345 67890' | replace: ' ', '' }}">{{ section.settings.contact_phone | default: '080 12345 67890' }}</a></div>
+              <div><a href="mailto:{{ section.settings.contact_email | default: 'care@thirdwavecoffee.in' }}">{{ section.settings.contact_email | default: 'care@thirdwavecoffee.in' }}</a></div>
+            </div>
+            <!-- Mobile Download App link (under phone & email) -->
+            <a class="twc-app-link twc-app-link--mobile" href="{{ section.settings.app_link | default: 'http://onelink.to/twcrindia' }}">
+              {{ section.settings.app_text_mobile | default: 'DOWNLOAD OUR APP' }}
+            </a>
+            <div class="twc-contact-copyright twc-copyright--desktop">
+              {{ section.settings.copyright_text | default: 'Copyright 2021 Third Wave Coffee' }}
+            </div>
+          </div>
         </div>
 
-        <a href="{{ section.settings.app_link | default: '#' }}" class="twc-app-link">
-          DOWNLOAD THE TWC CAFE APP
-        </a>
-      </div>
+        <!-- Mobile Bottom Bar (divider + socials on left, copyright on right) -->
+        <div class="twc-footer__mobile-bottom">
+          <div class="twc-footer__mobile-divider"></div>
+          <div class="twc-footer__mobile-bar">
+            <div class="twc-social-links">
+              <!-- Instagram -->
+              <a href="{{ section.settings.instagram | default: 'https://www.instagram.com/thirdwavecoffeeindia/' }}" target="_blank" rel="noopener" aria-label="Instagram">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+              </a>
 
-      <div class="twc-footer__copyright">
-        Copyright {{ 'now' | date: '%Y' }} Third Wave Coffee
+              <!-- Facebook -->
+              <a href="{{ section.settings.facebook | default: 'https://www.facebook.com/thirdwavecoffeeindia' }}" target="_blank" rel="noopener" aria-label="Facebook">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.77 7.46H14.5v-1.9c0-.9.6-1.1 1-1.1h3V.5h-4.33C10.24.5 9.5 3.44 9.5 5.32v2.15h-3v4h3v12h5v-12h3.85l.42-4z"/>
+                </svg>
+              </a>
+
+              <!-- Spotify -->
+              <a href="{{ section.settings.spotify | default: 'https://open.spotify.com/playlist/1SJnLIFmgg0R83wLluQ6Ou?si=a46c722ed6124009' }}" target="_blank" rel="noopener" aria-label="Spotify">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.503 17.308c-.215.353-.675.466-1.028.25-2.82-1.722-6.37-2.112-10.55-1.157-.402.092-.803-.16-.895-.562-.092-.403.16-.803.562-.895 4.577-1.047 8.508-.605 11.66 1.336.353.216.466.675.251 1.028zm1.47-3.267c-.27.441-.847.58-1.288.31-3.228-1.984-8.148-2.557-11.966-1.398-.496.15-1.023-.13-1.173-.626-.15-.497.13-1.024.626-1.174 4.364-1.325 9.791-.684 13.49 1.599.442.271.581.848.311 1.289zm.129-3.402C15.234 8.358 8.868 8.147 5.163 9.272c-.604.184-1.246-.16-1.43-.764-.183-.604.161-1.246.764-1.43 4.257-1.293 11.298-1.049 15.753 1.596.544.323.722 1.028.4 1.572-.323.543-1.028.72-1.571.399z"/>
+                </svg>
+              </a>
+            </div>
+            <div class="twc-contact-copyright twc-copyright--mobile">
+              {{ section.settings.copyright_text | default: 'Copyright 2026 Third Wave Coffee' }}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </footer>
@@ -148,198 +235,510 @@
 
 <style>
   .twc-footer-wrapper {
-    background-color: var(--twc-footer-bg);
-    color: var(--twc-footer-text);
+    background-color: var(--twc-footer-bg, #2D3C4B) !important;
+    color: var(--twc-footer-text, #d7d1c9);
     width: 100%;
-    font-size: 13px;
-    line-height: 1.6;
     box-sizing: border-box;
+    font-family: inherit;
+    -webkit-font-smoothing: antialiased;
   }
+
   .twc-footer {
-    max-width: 1400px;
+    max-width: 1440px;
     margin: 0 auto;
-    padding: 60px 48px 36px;
+    padding: 56px 40px 48px;
+    box-sizing: border-box;
+    background-color: transparent;
+  }
+
+  .twc-footer__inner {
+    display: flex;
+    align-items: stretch; /* Allows left container to grow vertically to match right container */
+    gap: 150px;
+    width: 100%;
     box-sizing: border-box;
   }
-  .twc-footer__top {
-    display: flex;
-    justify-content: space-between;
-    gap: 60px;
-    align-items: flex-start;
-  }
+
+  /* ========================================================
+     LEFT COLUMN: FORM (IMAGE 2) & GROW VERTICALLY + CUP
+     ======================================================== */
   .twc-footer__left {
-    flex: 0 0 340px;
+    width: 32%;
+    flex: 0 0 32%;
+    max-width: 35%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    min-height: 200px;
+    justify-content: space-between; /* Pushes cup icon to the bottom */
+    align-self: stretch; /* Stretches vertically */
+    box-sizing: border-box;
+    min-height: 240px;
   }
-  .twc-footer__heading {
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #ffffff;
-    margin: 0 0 16px 0;
+
+  .twc-footer__newsletter {
+    width: 100%;
   }
-  .twc-newsletter-input-group {
-    display: flex;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    background: transparent;
-    max-width: 320px;
+
+  .twc-footer__heading,
+  footer h3 {
+    font-size: 15px !important;
+    text-transform: uppercase !important;
+    font-family: Lato, sans-serif !important;
+    font-weight: 700 !important;
+    color: #d7d1c9 !important;
+    margin: 0 0 16px 0 !important;
+    letter-spacing: 0.06em;
+    line-height: 1.3;
   }
-  .twc-newsletter-input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    padding: 10px 14px;
-    color: #ffffff;
-    font-size: 13px;
-    outline: none;
-  }
-  .twc-newsletter-input::placeholder {
-    color: rgba(255, 255, 255, 0.45);
-    font-size: 12px;
-  }
-  .twc-newsletter-btn {
-    background: rgba(255, 255, 255, 0.12);
-    border: none;
-    border-left: 1px solid rgba(255, 255, 255, 0.35);
-    color: #ffffff;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    padding: 0 16px;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: background 0.2s;
-  }
-  .twc-newsletter-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
-  }
-  .twc-newsletter-success {
-    color: #8ed081;
-    font-size: 12px;
-    margin-top: 8px;
-  }
-  .twc-footer__cup-icon {
-    margin-top: 40px;
-    color: rgba(255, 255, 255, 0.7);
-  }
-  .twc-footer__cols {
-    flex: 1;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 32px;
-  }
-  .twc-col-title {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: #ffffff;
-    margin: 0 0 18px 0;
-    text-transform: uppercase;
-  }
-  .twc-footer-links {
-    list-style: none;
+
+  .twc-newsletter-form {
     margin: 0;
     padding: 0;
+    width: 100%;
+  }
+
+  .twc-newsletter-input-group {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    align-items: stretch;
+    border: 1px solid #d7d1c9 !important;
+    background: transparent !important;
+    width: 100%;
+    max-width: 100%;
+    height: 35px !important;
+    box-sizing: border-box;
   }
-  .twc-footer-links a {
-    color: var(--twc-footer-text);
-    text-decoration: none;
-    font-size: 12.5px;
-    transition: color 0.2s;
-  }
-  .twc-footer-links a:hover {
+
+  .twc-newsletter-input {
+    flex: 1;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    padding: 10px 15px;
     color: #ffffff;
+    font-size: 13px;
+    font-family: Roboto, sans-serif;
+    outline: none;
+    box-shadow: none;
+    min-width: 0;
+    height: 100%;
+    box-sizing: border-box;
   }
-  .twc-footer__col--contact p {
-    margin: 0 0 14px 0;
+
+  .twc-newsletter-input:-webkit-autofill,
+  .twc-newsletter-input:-webkit-autofill:hover,
+  .twc-newsletter-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #ffffff;
+    -webkit-box-shadow: 0 0 0px 1000px #2D3C4B inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  .twc-newsletter-input::placeholder {
+    color: rgba(215, 209, 201, 0.7) !important;
+    font-size: 13px;
+    font-family: Roboto, sans-serif;
+  }
+
+  .twc-newsletter-btn {
+    background: transparent !important;
+    border: none !important;
+    border-left: 1px solid #d7d1c9 !important;
+    color: #d7d1c9 !important;
     font-size: 12px;
-    line-height: 1.5;
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.16em;
+    padding: 0 22px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    box-sizing: border-box;
   }
-  .twc-contact-phones a {
-    color: var(--twc-footer-text);
-    text-decoration: none;
+
+  .twc-newsletter-btn:hover {
+    background: rgba(215, 209, 201, 0.15);
+    color: #ffffff !important;
+  }
+
+  .twc-newsletter-success {
+    color: #8ed081;
+    font-size: 11.5px;
+    margin: 8px 0 0 0;
+  }
+
+  .twc-newsletter-error {
+    color: #ff8b8b;
+    font-size: 11.5px;
+    margin: 8px 0 0 0;
+  }
+
+  .twc-footer__cup-container {
+    margin-top: auto !important; /* Moves image/cup to bottom of container */
+    padding-top: 48px;
+    line-height: 1;
+  }
+
+  .twc-cup-svg {
+    width: 65px;
+    height: auto;
     display: block;
-    margin-bottom: 4px;
   }
-  .twc-contact-phones a:hover {
-    color: #ffffff;
+
+  .twc-cup-stroke {
+    fill: none;
+    stroke: #d7d1c9 !important;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
-  .twc-footer__divider {
-    border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    margin: 40px 0 24px 0;
+
+  .twc-cup-fill {
+    fill: #d7d1c9 !important;
   }
-  .twc-footer__bottom {
+
+  /* ========================================================
+     RIGHT COLUMN: 50% WIDTH, FLEXBOX (IMAGE 1)
+     ======================================================== */
+  .twc-footer__right {
+    width: 50% !important;
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 20px;
+    gap: 36px;
+    box-sizing: border-box;
   }
-  .twc-footer__bottom-left {
+
+  /* Navigation Group (Columns 1-3 + Divider + Socials) */
+  .twc-footer__nav-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    box-sizing: border-box;
+  }
+
+  .twc-footer__nav-cols {
+    display: grid;
+    grid-template-columns: 1fr 1.35fr 1.15fr;
+    gap: 24px;
+    width: 100%;
+  }
+
+  /* Footer H5 Font Styles (Image 1) */
+  .twc-col-title,
+  footer h5 {
+    color: #d7d1c9 !important;
+    font-size: 13px !important;
+    margin-bottom: 14px !important;
+    margin-top: 0 !important;
+    font-family: Roboto, sans-serif !important;
+    font-weight: 700 !important;
+    line-height: 1.4;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em;
+  }
+
+  /* Space between menu items only 7px (Prompt item 3) */
+  .twc-footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 7px !important;
+  }
+
+  .twc-footer-links > div {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+  }
+
+  /* Menu items font style (Image 2 & Prompt point 3) */
+  footer .links a,
+  .twc-footer-links a,
+  .twc-footer .links a {
+    color: #d7d1c9 !important;
+    font-size: 13px !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    font-family: Roboto, sans-serif !important;
+    font-weight: 400 !important;
+    text-decoration: none;
+    line-height: 1.4;
+    display: inline-block;
+    transition: opacity 0.2s ease, color 0.2s ease;
+  }
+
+  footer .links a:hover,
+  .twc-footer-links a:hover,
+  .twc-footer .links a:hover {
+    color: #ffffff !important;
+  }
+
+  /* Divider line spanning only under columns 1-3 on desktop */
+  .twc-footer__nav-divider {
+    border-bottom: 1px solid #D7D1C9;
+    margin-top: 30px;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+
+  /* Bottom row under the divider (desktop) */
+  .twc-footer__nav-bottom {
     display: flex;
     align-items: center;
-    gap: 32px;
+    justify-content: flex-start;
+    gap: 28px;
+    flex-wrap: wrap;
   }
+
   .twc-social-links {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
   }
+
   .twc-social-links a {
-    color: var(--twc-footer-text);
-    display: inline-flex;
-    align-items: center;
-    transition: opacity 0.2s;
-  }
-  .twc-social-links a:hover {
     color: #ffffff;
     opacity: 0.85;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    text-decoration: none;
   }
+
+  .twc-social-links a:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
   .twc-app-link {
-    color: #ffffff;
+    color: #d7d1c9 !important;
     text-decoration: underline;
     text-underline-offset: 4px;
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-  }
-  .twc-app-link:hover {
-    opacity: 0.8;
-  }
-  .twc-footer__copyright {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.45);
+    transition: color 0.2s ease;
+    white-space: nowrap;
+    display: inline-block;
   }
 
-  @media (max-width: 900px) {
-    .twc-footer__top {
-      flex-direction: column;
-      gap: 36px;
+  .twc-app-link:hover {
+    color: #ffffff !important;
+  }
+
+  .twc-app-link--mobile {
+    display: none;
+  }
+
+  /* Contact Column (Column 4) */
+  .twc-footer__col--contact {
+    flex: 0 0 215px;
+    max-width: 215px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  .twc-contact-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  /* twc-contact-content font style matching menu items (Prompt item 4) */
+  .twc-contact-content,
+  .twc-contact-address,
+  .twc-contact-direct,
+  .twc-contact-direct a {
+    font-family: Roboto, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    color: #d7d1c9 !important;
+    line-height: 1.4 !important;
+    text-decoration: none;
+  }
+
+  .twc-contact-address {
+    margin-bottom: 16px;
+  }
+
+  .twc-contact-address br {
+    display: none !important;
+  }
+
+  .twc-contact-direct {
+    display: flex;
+    flex-direction: column;
+    gap: 7px !important;
+
+  }
+
+  .twc-contact-direct a {
+    display: inline-block;
+    transition: color 0.2s ease;
+  }
+
+  .twc-contact-direct a:hover {
+    color: #ffffff !important;
+  }
+
+  /* Copyright font color matching menu item (Prompt item 5) */
+  .twc-contact-copyright {
+    font-size: 11px;
+    color: #d7d1c9 !important;
+    margin-top: 35px;
+    white-space: nowrap;
+    line-height: 1.4;
+  }
+
+  .twc-footer__mobile-bottom {
+    display: none;
+  }
+
+  /* ========================================================
+     RESPONSIVE BREAKPOINTS (MATCHING IMAGE 3 FOR MOBILE)
+     ======================================================== */
+  @media (max-width: 1180px) {
+    .twc-footer__inner {
+      gap: 28px;
     }
     .twc-footer__left {
-      flex: 1 1 100%;
-      min-height: auto;
+      width: 32%;
+      flex: 0 0 32%;
     }
-    .twc-footer__cup-icon {
-      margin-top: 20px;
-    }
-    .twc-footer__cols {
-      grid-template-columns: repeat(2, 1fr);
+    .twc-footer__right {
+      width: 58% !important;
+      flex: 0 0 58% !important;
+      max-width: 58% !important;
       gap: 24px;
     }
-    .twc-footer__bottom {
+  }
+
+  @media (max-width: 860px) {
+    .twc-footer {
+      padding: 40px 24px 32px;
+    }
+
+    .twc-footer__inner {
       flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
+      gap: 40px;
+    }
+
+    /* Left Form on Mobile */
+    .twc-footer__left {
+      width: 100% !important;
+      flex: 1 1 100% !important;
+      max-width: 100% !important;
+      min-height: auto;
+    }
+
+    .twc-footer__cup-container {
+      display: none !important;
+    }
+
+    /* Right Container on Mobile (100% full width) */
+    .twc-footer__right {
+      width: 100% !important;
+      flex: 1 1 100% !important;
+      max-width: 100% !important;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .twc-footer__nav-group {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    /* 3 Columns in a Row: COMPANY, CAFES, POLICIES (Matching Image 3) */
+    .twc-footer__nav-cols {
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 20px 16px !important;
+      width: 100%;
+    }
+
+    .twc-footer__col--company {
+      order: 1 !important;
+    }
+
+    .twc-footer__col--cafes {
+      order: 2 !important;
+    }
+
+    .twc-footer__col--policies {
+      order: 3 !important;
+    }
+
+    /* Hide desktop divider & desktop bottom bar */
+    .twc-divider--desktop,
+    .twc-nav-bottom--desktop,
+    .twc-copyright--desktop {
+      display: none !important;
+    }
+
+    /* Contact Column on Mobile (Under 3 Columns) */
+    .twc-footer__col--contact {
+      flex: 1 1 100%;
+      max-width: 100%;
+      width: 100%;
+      margin-top: 36px;
+    }
+
+    .twc-contact-address {
+      max-width: 360px;
+      line-height: 2 !important;
+    }
+
+    /* DOWNLOAD OUR APP on mobile under phone/email */
+    .twc-app-link--mobile {
+      display: inline-block !important;
+      margin-top: 14px;
+      margin-bottom: 24px;
+      font-size: 12px;
+      letter-spacing: 0.05em;
+    }
+
+    /* Full-width Divider Line across container */
+    .twc-footer__mobile-bottom {
+      display: block !important;
+      width: 100%;
+    }
+
+    .twc-footer__mobile-divider {
+      border-bottom: 1px solid rgba(215, 209, 201, 0.35);
+      width: 100%;
+      margin: 0 0 20px 0;
+    }
+
+    /* Bottom row: Socials on left, Copyright on right */
+    .twc-footer__mobile-bar {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      width: 100%;
+    }
+
+    .twc-social-links svg {
+      width: 15px !important;
+      height: 15px !important;
+    }
+
+    .twc-social-link--youtube {
+      display: none !important; /* Hidden on mobile matching Image 3 */
+    }
+
+    .twc-copyright--mobile {
+      display: block !important;
+      margin-top: 0 !important;
+      text-align: right;
+      font-size: 11px !important;
     }
   }
 </style>
@@ -349,15 +748,19 @@
   "name": "TWC Footer",
   "settings": [
     {
+      "type": "header",
+      "content": "Newsletter"
+    },
+    {
       "type": "text",
       "id": "newsletter_title",
-      "label": "Newsletter Title",
+      "label": "Heading",
       "default": "DON'T BE A STRANGER."
     },
     {
       "type": "text",
       "id": "newsletter_placeholder",
-      "label": "Newsletter Placeholder",
+      "label": "Input Placeholder",
       "default": "Your email id"
     },
     {
@@ -367,6 +770,93 @@
       "default": "SIGN UP"
     },
     {
+      "type": "header",
+      "content": "Navigation Menus (Optional)"
+    },
+    {
+      "type": "text",
+      "id": "cafes_title",
+      "label": "Cafes Column Title",
+      "default": "CAFES"
+    },
+    {
+      "type": "link_list",
+      "id": "menu_cafes",
+      "label": "Cafes Menu (Leave empty for default)"
+    },
+    {
+      "type": "text",
+      "id": "policies_title",
+      "label": "Policies Column Title",
+      "default": "POLICIES"
+    },
+    {
+      "type": "link_list",
+      "id": "menu_policies",
+      "label": "Policies Menu (Leave empty for default)"
+    },
+    {
+      "type": "text",
+      "id": "company_title",
+      "label": "Company Column Title",
+      "default": "COMPANY"
+    },
+    {
+      "type": "link_list",
+      "id": "menu_company",
+      "label": "Company Menu (Leave empty for default)"
+    },
+    {
+      "type": "header",
+      "content": "Contact Information"
+    },
+    {
+      "type": "text",
+      "id": "contact_title",
+      "label": "Contact Column Title",
+      "default": "CONTACT"
+    },
+    {
+      "type": "text",
+      "id": "contact_address",
+      "label": "Address",
+      "default": "2nd Floor, 2082 24th Main Rd Vanganahalli 1st Sector, HSR Layout, Bengaluru 560102"
+    },
+    {
+      "type": "text",
+      "id": "contact_phone",
+      "label": "Phone Number",
+      "default": "080 12345 67890"
+    },
+    {
+      "type": "text",
+      "id": "contact_email",
+      "label": "Email Address",
+      "default": "care@thirdwavecoffee.in"
+    },
+    {
+      "type": "text",
+      "id": "copyright_text",
+      "label": "Copyright Text",
+      "default": "Copyright 2026 Third Wave Coffee"
+    },
+    {
+      "type": "header",
+      "content": "App & Social Links"
+    },
+    {
+      "type": "text",
+      "id": "app_text",
+      "label": "App Link Text (Desktop)",
+      "default": "DOWNLOAD THE TWC CAFE APP"
+    },
+    {
+      "type": "text",
+      "id": "app_text_mobile",
+      "label": "App Link Text (Mobile)",
+      "default": "DOWNLOAD OUR APP"
+    },
+    {
       "type": "url",
       "id": "app_link",
       "label": "App Download Link"
@@ -374,34 +864,54 @@
     {
       "type": "text",
       "id": "instagram",
-      "label": "Instagram URL"
+      "label": "Instagram URL",
+      "default": "https://www.instagram.com/thirdwavecoffeeindia/"
     },
     {
       "type": "text",
       "id": "facebook",
-      "label": "Facebook URL"
+      "label": "Facebook URL",
+      "default": "https://www.facebook.com/thirdwavecoffeeindia"
     },
     {
       "type": "text",
       "id": "youtube",
-      "label": "YouTube URL"
+      "label": "YouTube URL",
+      "default": "https://youtube.com"
     },
     {
       "type": "text",
       "id": "spotify",
-      "label": "Spotify URL"
+      "label": "Spotify URL",
+      "default": "https://open.spotify.com/playlist/1SJnLIFmgg0R83wLluQ6Ou?si=a46c722ed6124009"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
     },
     {
       "type": "color",
       "id": "bg_color",
       "label": "Background Color",
-      "default": "#2b3b47"
+      "default": "#2D3C4B"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent / Heading Color",
+      "default": "#d7d1c9"
     },
     {
       "type": "color",
       "id": "text_color",
-      "label": "Text Color",
-      "default": "#d5dde4"
+      "label": "Text / Link Color",
+      "default": "#d7d1c9"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Divider & Border Color",
+      "default": "rgba(215, 209, 201, 0.35)"
     }
   ]
 }

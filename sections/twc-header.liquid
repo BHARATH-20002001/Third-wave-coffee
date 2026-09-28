@@ -320,6 +320,7 @@
     </nav>
   </div>
 </header>
+<div id="twc-header-placeholder" class="twc-header-placeholder" style="display: none;" aria-hidden="true"></div>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;600;700;900&display=swap');
@@ -332,6 +333,34 @@
     box-sizing: border-box;
     padding-top: var(--twc-header-padding-top, 0px);
     padding-bottom: var(--twc-header-padding-bottom, 0px);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .twc-header-wrapper.twc-header-sticky {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 999;
+  }
+  .twc-header-wrapper.twc-header-scrolled {
+    background-color: #ffffff !important;
+    --twc-header-bg: #ffffff !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    animation: twcHeaderSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .twc-header-placeholder {
+    width: 100%;
+    pointer-events: none;
+    visibility: hidden;
+  }
+  @keyframes twcHeaderSlideDown {
+    0% {
+      transform: translateY(-100%);
+    }
+    100% {
+      transform: translateY(0);
+    }
   }
   .twc-header-wrapper--sticky {
     position: sticky;
@@ -909,6 +938,65 @@
         else window.location.href = '{{ routes.search_url }}';
       }
     });
+
+    // 5. Scroll-Triggered Sticky Header (Slide-down after 200px with white bg, revert to normal bg when reaching up)
+    var header = document.getElementById('header-component');
+    var placeholder = document.getElementById('twc-header-placeholder');
+    if (header) {
+      var isFixed = false;
+      var isScrolled = false;
+      var ticking = false;
+
+      function handleHeaderScroll() {
+        var scrollY = Math.max(0, window.pageYOffset || document.documentElement.scrollTop || 0);
+
+        if (scrollY > 200) {
+          if (!isFixed) {
+            if (placeholder) {
+              placeholder.style.height = header.offsetHeight + 'px';
+              placeholder.style.display = 'block';
+            }
+            header.classList.add('twc-header-sticky');
+            isFixed = true;
+          }
+          if (!isScrolled) {
+            header.classList.add('twc-header-scrolled');
+            isScrolled = true;
+          }
+        } else {
+          // When reaching back up (scrollY <= 200)
+          if (isScrolled) {
+            header.classList.remove('twc-header-scrolled');
+            isScrolled = false;
+          }
+          if (scrollY <= 0 && isFixed) {
+            header.classList.remove('twc-header-sticky');
+            if (placeholder) {
+              placeholder.style.display = 'none';
+              placeholder.style.height = '0px';
+            }
+            isFixed = false;
+          }
+        }
+        ticking = false;
+      }
+
+      function onScroll() {
+        if (!ticking) {
+          window.requestAnimationFrame(handleHeaderScroll);
+          ticking = true;
+        }
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', function() {
+        if (isFixed && placeholder) {
+          placeholder.style.height = header.offsetHeight + 'px';
+        }
+      }, { passive: true });
+
+      handleHeaderScroll();
+    }
   })();
 </script>
 
